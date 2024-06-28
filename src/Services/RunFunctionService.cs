@@ -1,5 +1,4 @@
 using function_csharp;
-using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using k8s;
@@ -28,20 +27,20 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
         {
             ApiVersion = V1Deployment.KubeApiVersion,
             Kind = V1Deployment.KubeKind,
-            Metadata = new V1ObjectMeta()
+            Metadata = new()
             {
                 Name = "test-deployment",
                 NamespaceProperty = "TestNamespace"
             },
             Spec = new()
             {
-                Template = new V1PodTemplateSpec()
+                Template = new()
                 {
                     Spec = new()
                     {
                         Containers =
                         [
-                            new V1Container()
+                            new()
                             {
                                 Name = "test-container",
                                 Image = "nginx:latest"
