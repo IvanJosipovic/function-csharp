@@ -1,5 +1,9 @@
 using function_csharp;
+using Google.Protobuf;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using k8s;
+using k8s.Models;
 
 namespace GrpcService.Services;
 
@@ -19,6 +23,40 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
         var resp = request.To(Response.DefaultTTL);
 
         Response.Normal(resp, "I was here!");
+
+        var deployment = new V1Deployment()
+        {
+            ApiVersion = V1Deployment.KubeApiVersion,
+            Kind = V1Deployment.KubeKind,
+            Metadata = new V1ObjectMeta()
+            {
+                Name = "test-deployment",
+                NamespaceProperty = "TestNamespace"
+            },
+            Spec = new()
+            {
+                Template = new V1PodTemplateSpec()
+                {
+                    Spec = new()
+                    {
+                        Containers =
+                        [
+                            new V1Container()
+                            {
+                                Name = "test-container",
+                                Image = "nginx:latest"
+                            }
+
+                        ]
+                    }
+                }
+            }
+        };
+
+        resp.Desired.Resources.Add("test", new Resource()
+        {
+            Resource_ = Struct.Parser.ParseJson(KubernetesJson.Serialize(deployment))
+        });
 
         return Task.FromResult(resp);
     }
