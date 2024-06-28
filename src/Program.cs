@@ -2,7 +2,6 @@ using GrpcService.Services;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using System.Security.Cryptography.X509Certificates;
-using System.Text.Json;
 
 namespace function_csharp;
 
@@ -66,7 +65,7 @@ public class Program
 
         builder.WebHost.UseUrls(GetAddress());
 
-        builder.WebHost.ConfigureKestrel((builder, options) =>
+        builder.WebHost.ConfigureKestrel(options =>
         {
             options.ConfigureEndpointDefaults(lo =>
             {
@@ -86,13 +85,14 @@ public class Program
 
         builder.Logging.AddFilter("Default", args.Contains("-d") || args.Contains("--debug") ? LogLevel.Debug : LogLevel.Information);
         builder.Logging.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
+        builder.Logging.AddFilter("Microsoft.AspNetCore.Hosting.Diagnostics", LogLevel.Critical);
         builder.Logging.AddFilter("Microsoft.Hosting.Lifetime", LogLevel.Warning);
 
         builder.Logging.AddJsonConsole(options =>
         {
             options.IncludeScopes = false;
             options.TimestampFormat = "HH:mm:ss ";
-            options.JsonWriterOptions = new JsonWriterOptions
+            options.JsonWriterOptions = new()
             {
                 Indented = true,
             };

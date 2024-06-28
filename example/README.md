@@ -6,11 +6,12 @@ with these example manifests.
 ```shell
 # Run the function locally
 $ docker build -t function-csharp -f ../src/Dockerfile ../src
+$ docker run -it function-csharp -p 9443:9443
 ```
 
 ```shell
 # Then, in another terminal, call it with these example manifests
-$ crossplane beta render xr.yaml composition.yaml functions.yaml -r
+$ crank beta render xr.yaml composition.yaml functions.yaml -r
 ---
 apiVersion: example.crossplane.io/v1
 kind: XR
