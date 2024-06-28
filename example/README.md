@@ -6,7 +6,7 @@ with these example manifests.
 ```shell
 # Run the function locally
 $ docker build -t function-csharp -f ../src/Dockerfile ../src
-$ docker run -it function-csharp -p 9443:9443
+$ docker run -it -p [::1]:9443:9443 function-csharp 
 ```
 
 ```shell
