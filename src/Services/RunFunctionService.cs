@@ -18,6 +18,8 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
 
         var resp = request.To(Response.DefaultTTL);
 
+        Response.Normal(resp, "I was here!");
+
         return Task.FromResult(resp);
     }
 }

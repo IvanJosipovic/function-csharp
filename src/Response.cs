@@ -32,4 +32,46 @@ public static class Response
 
         return resp;
     }
+
+    /// <summary>
+    /// Add a normal result to the response.
+    /// </summary>
+    /// <param name="rsp"></param>
+    /// <param name="message"></param>
+    public static void Normal(RunFunctionResponse rsp, string message)
+    {
+        rsp.Results.Add(new Result
+        {
+            Severity = Severity.Normal,
+            Message = message
+        });
+    }
+
+    /// <summary>
+    /// Add a warning result to the response.
+    /// </summary>
+    /// <param name="rsp"></param>
+    /// <param name="message"></param>
+    public static void Warning(RunFunctionResponse rsp, string message)
+    {
+        rsp.Results.Add(new Result
+        {
+            Severity = Severity.Warning,
+            Message = message
+        });
+    }
+
+    /// <summary>
+    /// Add a fatal result to the response.
+    /// </summary>
+    /// <param name="rsp"></param>
+    /// <param name="message"></param>
+    public static void Fatal(RunFunctionResponse rsp, string message)
+    {
+        rsp.Results.Add(new Result
+        {
+            Severity = Severity.Fatal,
+            Message = message
+        });
+    }
 }
