@@ -4,6 +4,9 @@ using Grpc.Core;
 using k8s;
 using k8s.Models;
 using KubernetesCRDModelGen.Models.applications.azuread.upbound.io;
+using KubernetesCRDModelGen.Models.apiextensions.crossplane.io;
+using Google.Protobuf;
+
 namespace GrpcService.Services;
 
 public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBase
@@ -23,7 +26,11 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
 
         Response.Normal(resp, "Running Function");
 
-        var name = $"app-terraform-azure-{request.Context.Fields["apiextensions.crossplane.io/environment"].StructValue.Fields["data"].StructValue.Fields["environmentName"].StringValue}-{request.Observed.Composite.Resource_.Fields["metadata"].StructValue.Fields["name"].StringValue}";
+        var envConfig = GetEnvironmentConfig(request);
+
+        var envName = envConfig.Data["environmentName"].ToString();
+
+        var name = $"app-terraform-azure-{envName}-{request.Observed.Composite.Resource_.Fields["metadata"].StructValue.Fields["name"].StringValue}";
 
         var app = new V1beta1Application()
         {
@@ -47,7 +54,7 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
                 {
                     DisplayName = name,
                     Owners = [
-                        request.Context.Fields["apiextensions.crossplane.io/environment"].StructValue.Fields["data"].StructValue.Fields["terraformServicePrinciple"].StructValue.Fields["objectId"].StringValue
+                        envConfig.Data["terraformServicePrinciple"]["objectId"].ToString()
                     ],
                     RequiredResourceAccess = [
                     ],
@@ -55,7 +62,7 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
                         new(){
                             RedirectUris = [
                                 "http://localhost:7007/api/auth/microsoft/handler/frame",
-                                "https://backstage.aks-dev.galileo.teck.com/api/auth/microsoft/handler/frame"
+                                "https://backstage.aks-dev.app.com/api/auth/microsoft/handler/frame"
                             ]
                         }
                     ],
@@ -69,5 +76,13 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
         });
 
         return Task.FromResult(resp);
+    }
+
+    private V1alpha1EnvironmentConfig GetEnvironmentConfig(RunFunctionRequest request)
+    {
+        var formatterSettings = JsonFormatter.Settings.Default.WithFormatDefaultValues(true);
+        string json = new JsonFormatter(formatterSettings).Format(request.Context.Fields["apiextensions.crossplane.io/environment"].StructValue);
+
+        return KubernetesJson.Deserialize<V1alpha1EnvironmentConfig>(json);
     }
 }

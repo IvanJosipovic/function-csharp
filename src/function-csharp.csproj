@@ -19,6 +19,7 @@
     <PackageReference Include="KubernetesClient" Version="14.0.2" />
     <PackageReference Include="KubernetesCRDModelGen.Models.azure.com" Version="1.0.0-alpha.283" />
     <PackageReference Include="KubernetesCRDModelGen.Models.azuread.upbound.io" Version="1.0.0-alpha.284" />
+    <PackageReference Include="KubernetesCRDModelGen.Models.crossplane.io" Version="1.0.0-alpha.284" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
   </ItemGroup>
 
