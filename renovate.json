@@ -1,6 +1,14 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ]
+  "enabled": true,
+  "timezone": "America/Vancouver",
+  "dependencyDashboard": true,
+  "semanticCommits": "enabled",
+  "assignees": ["@ivanjosipovic"],
+  "extends": [ "config:recommended" ],
+  "platformAutomerge": true,
+  "ignorePaths": [
+    "**/docs/**",
+    "**/charts/**"
+  ],
 }
