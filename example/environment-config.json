@@ -1,0 +1,20 @@
+{
+  "apiVersion": "apiextensions.crossplane.io/v1alpha1",
+  "data": {
+    "environmentName": "da-platform-dev",
+    "terraformServicePrinciple": {
+      "objectId": "3983c9fb-06c6-4306-b917-d9b68fe45a50"
+    }
+  },
+  "kind": "EnvironmentConfig",
+  "metadata": {
+    "annotations": {
+      "argocd.argoproj.io/tracking-id": "alloy-system:apiextensions.crossplane.io/EnvironmentConfig:crossplane-system/config"
+    },
+    "creationTimestamp": "2024-07-18T20:48:38.000Z",
+    "generation": 4,
+    "name": "config",
+    "resourceVersion": "8666356",
+    "uid": "c4bf9b93-8be3-41ae-a5cd-936c23d01175"
+  }
+}

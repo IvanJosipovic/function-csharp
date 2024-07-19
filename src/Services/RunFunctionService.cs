@@ -3,7 +3,7 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using k8s;
 using k8s.Models;
-
+using KubernetesCRDModelGen.Models.applications.azuread.upbound.io;
 namespace GrpcService.Services;
 
 public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBase
@@ -21,40 +21,51 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
 
         var resp = request.To(Response.DefaultTTL);
 
-        Response.Normal(resp, "I was here!");
+        Response.Normal(resp, "Running Function");
 
-        var deployment = new V1Deployment()
+        var name = $"app-terraform-azure-{request.Context.Fields["apiextensions.crossplane.io/environment"].StructValue.Fields["data"].StructValue.Fields["environmentName"].StringValue}-{request.Observed.Composite.Resource_.Fields["metadata"].StructValue.Fields["name"].StringValue}";
+
+        var app = new V1beta1Application()
         {
-            ApiVersion = V1Deployment.KubeApiVersion,
-            Kind = V1Deployment.KubeKind,
+            ApiVersion = V1beta1Application.KubeApiVersion,
+            Kind = V1beta1Application.KubeKind,
             Metadata = new()
             {
-                Name = "test-deployment",
-                NamespaceProperty = "TestNamespace"
+                Annotations = new Dictionary<string, string>()
+                {
+                    { "crossplane.io/external-name", name },
+                },
+                Labels = new Dictionary<string, string>()
+                {
+                    { "da.teck.com/alloy-name", name }
+                },
+                Name = name,
             },
             Spec = new()
             {
-                Template = new()
+                ForProvider = new()
                 {
-                    Spec = new()
-                    {
-                        Containers =
-                        [
-                            new()
-                            {
-                                Name = "test-container",
-                                Image = "nginx:latest"
-                            }
-
-                        ]
-                    }
+                    DisplayName = name,
+                    Owners = [
+                        request.Context.Fields["apiextensions.crossplane.io/environment"].StructValue.Fields["data"].StructValue.Fields["terraformServicePrinciple"].StructValue.Fields["objectId"].StringValue
+                    ],
+                    RequiredResourceAccess = [
+                    ],
+                    Web = [
+                        new(){
+                            RedirectUris = [
+                                "http://localhost:7007/api/auth/microsoft/handler/frame",
+                                "https://backstage.aks-dev.galileo.teck.com/api/auth/microsoft/handler/frame"
+                            ]
+                        }
+                    ],
                 }
             }
         };
 
-        resp.Desired.Resources.Add("test", new Resource()
+        resp.Desired.Resources.Add("application", new Resource()
         {
-            Resource_ = Struct.Parser.ParseJson(KubernetesJson.Serialize(deployment))
+            Resource_ = Struct.Parser.ParseJson(KubernetesJson.Serialize(app))
         });
 
         return Task.FromResult(resp);

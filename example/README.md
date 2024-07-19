@@ -11,7 +11,7 @@ $ docker run -it -p 9443:9443 function-csharp
 
 ```shell
 # Then, in another terminal, call it with these example manifests
-$ crank beta render xr.yaml composition.yaml functions.yaml -r
+$ crank beta render xr.yaml composition.yaml functions.yaml --context-files=apiextensions.crossplane.io/environment=./environment-config.json
 ---
 apiVersion: example.crossplane.io/v1
 kind: XR
