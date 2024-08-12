@@ -44,7 +44,7 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
                 },
                 Labels = new Dictionary<string, string>()
                 {
-                    { "da.teck.com/alloy-name", name }
+                    { "app.com/name", name }
                 },
                 Name = name,
             },
@@ -54,12 +54,13 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
                 {
                     DisplayName = name,
                     Owners = [
-                        envConfig.Data["terraformServicePrinciple"]["objectId"].ToString()
+                        envConfig.Data["terraformServicePrinciple"]["objectId"]!.ToString()
                     ],
                     RequiredResourceAccess = [
                     ],
                     Web = [
-                        new(){
+                        new()
+                        {
                             RedirectUris = [
                                 "http://localhost:7007/api/auth/microsoft/handler/frame",
                                 "https://backstage.aks-dev.app.com/api/auth/microsoft/handler/frame"
