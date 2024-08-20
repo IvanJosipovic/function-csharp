@@ -1,0 +1,72 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xapplications.azuread.company.com
+spec:
+  group: azuread.company.com
+  names:
+    kind: xApplication
+    plural: xapplications
+  claimNames:
+    kind: Application
+    plural: application
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              owners:
+                type: array
+                items:
+                 type: string
+              requiredResourceAccess:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    resourceAppId:
+                      type: string
+                    resourceAccess:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          type:
+                            type: string
+              singlePageApplication:
+                type: object
+                properties:
+                  redirectUris:
+                    type: array
+                    items:
+                      type: string
+              web:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    homepageUrl:
+                      type: string
+                    implicitGrant:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          accessTokenIssuanceEnabled:
+                            type: boolean
+                          typeidTokenIssuanceEnabled:
+                            type: boolean
+                    logoutUrl:
+                      type: string
+                    redirectUris:
+                      type: array
+                      items:
+                        type: string

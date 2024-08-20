@@ -1,7 +1,11 @@
 # Replace this with your XR!
-apiVersion: example.crossplane.io/v1
-kind: XR
+apiVersion: azuread.company.com/v1alpha1
+kind: xApplication
 metadata:
   name: example-xr
 spec:
-  region: us-east-2
+  owners:
+  - "123"
+  - "1234"
+  redirectUris:
+  - https://company.com

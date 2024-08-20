@@ -1,13 +1,14 @@
-using function_csharp;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using k8s;
-using k8s.Models;
 using KubernetesCRDModelGen.Models.applications.azuread.upbound.io;
 using KubernetesCRDModelGen.Models.apiextensions.crossplane.io;
 using Google.Protobuf;
+using k8s.Models;
+using GrpcService;
+using function_csharp.Models;
 
-namespace GrpcService.Services;
+namespace function_csharp.Services;
 
 public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBase
 {
@@ -30,7 +31,9 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
 
         var envName = envConfig.Data["environmentName"].ToString();
 
-        var name = $"app-terraform-azure-{envName}-{request.Observed.Composite.Resource_.Fields["metadata"].StructValue.Fields["name"].StringValue}";
+        var compositeResource = GetCompositeResource<V1alpha1Application>(request);
+
+        var name = $"app-terraform-azure-{envName}-{compositeResource.Metadata.Name}";
 
         var app = new V1beta1Application()
         {
@@ -40,7 +43,7 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
             {
                 Annotations = new Dictionary<string, string>()
                 {
-                    { "crossplane.io/external-name", name },
+                    //{ "crossplane.io/external-name", name },
                 },
                 Labels = new Dictionary<string, string>()
                 {
@@ -56,6 +59,7 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
                     Owners = [
                         envConfig.Data["terraformServicePrinciple"]["objectId"]!.ToString()
                     ],
+                    PreventDuplicateNames = true,
                     RequiredResourceAccess = [
                     ],
                     Web = [
@@ -71,10 +75,10 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
             }
         };
 
-        resp.Desired.Resources.Add("application", new Resource()
+        resp.Desired.Resources[app.Name()] = new Resource()
         {
             Resource_ = Struct.Parser.ParseJson(KubernetesJson.Serialize(app))
-        });
+        };
 
         return Task.FromResult(resp);
     }
@@ -85,5 +89,13 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
         string json = new JsonFormatter(formatterSettings).Format(request.Context.Fields["apiextensions.crossplane.io/environment"].StructValue);
 
         return KubernetesJson.Deserialize<V1alpha1EnvironmentConfig>(json);
+    }
+
+    private T GetCompositeResource<T>(RunFunctionRequest request)
+    {
+        var formatterSettings = JsonFormatter.Settings.Default.WithFormatDefaultValues(true);
+        string json = new JsonFormatter(formatterSettings).Format(request.Observed.Composite.Resource_);
+
+        return KubernetesJson.Deserialize<T>(json);
     }
 }
