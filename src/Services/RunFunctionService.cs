@@ -1,13 +1,14 @@
-using function_csharp;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using k8s;
-using k8s.Models;
 using KubernetesCRDModelGen.Models.applications.azuread.upbound.io;
 using KubernetesCRDModelGen.Models.apiextensions.crossplane.io;
 using Google.Protobuf;
+using k8s.Models;
+using GrpcService;
+using function_csharp.Models;
 
-namespace GrpcService.Services;
+namespace function_csharp.Services;
 
 public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBase
 {
@@ -30,7 +31,9 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
 
         var envName = envConfig.Data["environmentName"].ToString();
 
-        var name = $"app-terraform-azure-{envName}-{request.Observed.Composite.Resource_.Fields["metadata"].StructValue.Fields["name"].StringValue}";
+        var compositeResource = GetCompositeResource<V1alpha1Application>(request);
+
+        var name = $"app-terraform-azure-{envName}-{compositeResource.Metadata.Name}";
 
         var app = new V1beta1Application()
         {
@@ -40,7 +43,7 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
             {
                 Annotations = new Dictionary<string, string>()
                 {
-                    { "crossplane.io/external-name", name },
+                    //{ "crossplane.io/external-name", name },
                 },
                 Labels = new Dictionary<string, string>()
                 {
@@ -50,31 +53,54 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
             },
             Spec = new()
             {
+                ManagementPolicies =
+                [
+                    V1beta1ApplicationSpecManagementPoliciesEnum.Observe,
+                    V1beta1ApplicationSpecManagementPoliciesEnum.Create,
+                    V1beta1ApplicationSpecManagementPoliciesEnum.Update,
+                    V1beta1ApplicationSpecManagementPoliciesEnum.LateInitialize,
+                ],
                 ForProvider = new()
                 {
                     DisplayName = name,
-                    Owners = [
-                        envConfig.Data["terraformServicePrinciple"]["objectId"]!.ToString()
+                    Owners =
+                    [
+                        envConfig.Data["terraformServicePrinciple"]["objectId"]!.ToString(),
+                        ..compositeResource.Spec.Owners
                     ],
-                    RequiredResourceAccess = [
-                    ],
-                    Web = [
-                        new()
+                    PreventDuplicateNames = true,
+                    RequiredResourceAccess = compositeResource.Spec.RequiredResourceAccess?.Select(x => new V1beta1ApplicationSpecForProviderRequiredResourceAccess()
+                    {
+                        ResourceAppId = x.ResourceAppId,
+                        ResourceAccess = x.ResourceAccess?.Select(y => new V1beta1ApplicationSpecForProviderRequiredResourceAccessResourceAccess()
                         {
-                            RedirectUris = [
-                                "http://localhost:7007/api/auth/microsoft/handler/frame",
-                                "https://backstage.aks-dev.app.com/api/auth/microsoft/handler/frame"
-                            ]
-                        }
-                    ],
+                            Id = y.Id,
+                            Type = y.Type
+                        }).ToList(),
+                    }).ToList(),
+                    SinglePageApplication = compositeResource.Spec.SinglePageApplication?.Select(x => new V1beta1ApplicationSpecForProviderSinglePageApplication()
+                    {
+                        RedirectUris = x.RedirectUris,
+                    }).ToList(),
+                    Web = compositeResource.Spec.Web?.Select(x => new V1beta1ApplicationSpecForProviderWeb()
+                    {
+                        HomepageUrl = x.HomepageUrl,
+                        ImplicitGrant = x.ImplicitGrant?.Select(y => new V1beta1ApplicationSpecForProviderWebImplicitGrant()
+                        {
+                            AccessTokenIssuanceEnabled = y.AccessTokenIssuanceEnabled,
+                            IdTokenIssuanceEnabled = y.IdTokenIssuanceEnabled
+                        }).ToList(),
+                        RedirectUris = x.RedirectUris,
+                        LogoutUrl = x.LogoutUrl,
+                    }).ToList(),
                 }
             }
         };
 
-        resp.Desired.Resources.Add("application", new Resource()
+        resp.Desired.Resources[app.Name()] = new Resource()
         {
             Resource_ = Struct.Parser.ParseJson(KubernetesJson.Serialize(app))
-        });
+        };
 
         return Task.FromResult(resp);
     }
@@ -85,5 +111,13 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
         string json = new JsonFormatter(formatterSettings).Format(request.Context.Fields["apiextensions.crossplane.io/environment"].StructValue);
 
         return KubernetesJson.Deserialize<V1alpha1EnvironmentConfig>(json);
+    }
+
+    private T GetCompositeResource<T>(RunFunctionRequest request)
+    {
+        var formatterSettings = JsonFormatter.Settings.Default.WithFormatDefaultValues(true);
+        string json = new JsonFormatter(formatterSettings).Format(request.Observed.Composite.Resource_);
+
+        return KubernetesJson.Deserialize<T>(json);
     }
 }

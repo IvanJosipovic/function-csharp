@@ -1,0 +1,29 @@
+name: CICD
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+      - 'alpha'
+      - 'beta'
+      - 'dev'
+  pull_request:
+    types: [opened, reopened, synchronize]
+  merge_group:
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        global-json-file: global.json
+
+    - name: Dotnet Build
+      run: dotnet build -c Release
