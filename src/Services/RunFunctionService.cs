@@ -53,24 +53,46 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
             },
             Spec = new()
             {
+                ManagementPolicies =
+                [
+                    V1beta1ApplicationSpecManagementPoliciesEnum.Observe,
+                    V1beta1ApplicationSpecManagementPoliciesEnum.Create,
+                    V1beta1ApplicationSpecManagementPoliciesEnum.Update,
+                    V1beta1ApplicationSpecManagementPoliciesEnum.LateInitialize,
+                ],
                 ForProvider = new()
                 {
                     DisplayName = name,
-                    Owners = [
-                        envConfig.Data["terraformServicePrinciple"]["objectId"]!.ToString()
+                    Owners =
+                    [
+                        envConfig.Data["terraformServicePrinciple"]["objectId"]!.ToString(),
+                        ..compositeResource.Spec.Owners
                     ],
                     PreventDuplicateNames = true,
-                    RequiredResourceAccess = [
-                    ],
-                    Web = [
-                        new()
+                    RequiredResourceAccess = compositeResource.Spec.RequiredResourceAccess?.Select(x => new V1beta1ApplicationSpecForProviderRequiredResourceAccess()
+                    {
+                        ResourceAppId = x.ResourceAppId,
+                        ResourceAccess = x.ResourceAccess?.Select(y => new V1beta1ApplicationSpecForProviderRequiredResourceAccessResourceAccess()
                         {
-                            RedirectUris = [
-                                "http://localhost:7007/api/auth/microsoft/handler/frame",
-                                "https://backstage.aks-dev.app.com/api/auth/microsoft/handler/frame"
-                            ]
-                        }
-                    ],
+                            Id = y.Id,
+                            Type = y.Type
+                        }).ToList(),
+                    }).ToList(),
+                    SinglePageApplication = compositeResource.Spec.SinglePageApplication?.Select(x => new V1beta1ApplicationSpecForProviderSinglePageApplication()
+                    {
+                        RedirectUris = x.RedirectUris,
+                    }).ToList(),
+                    Web = compositeResource.Spec.Web?.Select(x => new V1beta1ApplicationSpecForProviderWeb()
+                    {
+                        HomepageUrl = x.HomepageUrl,
+                        ImplicitGrant = x.ImplicitGrant?.Select(y => new V1beta1ApplicationSpecForProviderWebImplicitGrant()
+                        {
+                            AccessTokenIssuanceEnabled = y.AccessTokenIssuanceEnabled,
+                            IdTokenIssuanceEnabled = y.IdTokenIssuanceEnabled
+                        }).ToList(),
+                        RedirectUris = x.RedirectUris,
+                        LogoutUrl = x.LogoutUrl,
+                    }).ToList(),
                 }
             }
         };

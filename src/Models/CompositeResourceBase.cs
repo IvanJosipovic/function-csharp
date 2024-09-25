@@ -7,10 +7,10 @@ namespace function_csharp.Models;
 
 public enum V1CompositeResourceSpecCompositeDeletePolicyEnum
 {
-    [EnumMember(Value = "Background")]
+    [EnumMember(Value = "Background"), JsonStringEnumMemberName("Background")]
     /// <summary>Background</summary>
     Background,
-    [EnumMember(Value = "Foreground")]
+    [EnumMember(Value = "Foreground"), JsonStringEnumMemberName("Foreground")]
     /// <summary>Foreground</summary>
     Foreground
 }
@@ -45,10 +45,10 @@ public partial class V1CompositeResourceSpecCompositionSelector
 
 public enum V1CompositeResourceSpecCompositionUpdatePolicyEnum
 {
-    [EnumMember(Value = "Automatic")]
+    [EnumMember(Value = "Automatic"), JsonStringEnumMemberName("Automatic")]
     /// <summary>Automatic</summary>
     Automatic,
-    [EnumMember(Value = "Manual")]
+    [EnumMember(Value = "Manual"), JsonStringEnumMemberName("Manual")]
     /// <summary>Manual</summary>
     Manual
 }
@@ -157,7 +157,7 @@ public abstract class V1CompositeResourceSpecBase
 {
     /// <summary></summary>
     [JsonPropertyName("compositeDeletePolicy")]
-    [JsonConverter(typeof(JsonStringEnumMemberConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter<V1CompositeResourceSpecCompositeDeletePolicyEnum>))]
     public V1CompositeResourceSpecCompositeDeletePolicyEnum? CompositeDeletePolicy { get; set; }
 
     /// <summary></summary>
@@ -178,7 +178,7 @@ public abstract class V1CompositeResourceSpecBase
 
     /// <summary></summary>
     [JsonPropertyName("compositionUpdatePolicy")]
-    [JsonConverter(typeof(JsonStringEnumMemberConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter<V1CompositeResourceSpecCompositionUpdatePolicyEnum>))]
     public V1CompositeResourceSpecCompositionUpdatePolicyEnum? CompositionUpdatePolicy { get; set; }
 
     /// <summary></summary>
