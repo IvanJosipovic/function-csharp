@@ -4,7 +4,8 @@ kind: Function
 metadata:
   name: function-template-csharp
   annotations:
-    # This tells crossplane beta render to connect to the function locally.
+    # 'Docker' connects to Docker Engine. It uses Docker to pull and run a function runtime.
+    # 'Development' connects to a function runtime you have run manually.
     render.crossplane.io/runtime: Development
 spec:
   # This is ignored when using the Development runtime.

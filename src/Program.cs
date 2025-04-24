@@ -84,7 +84,7 @@ public class Program
         });
 
         builder.Logging.AddFilter("Default", args.Contains("-d") || args.Contains("--debug") ? LogLevel.Debug : LogLevel.Information);
-        builder.Logging.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
+        builder.Logging.AddFilter("Microsoft.AspNetCore", args.Contains("-d") || args.Contains("--debug") ? LogLevel.Debug : LogLevel.Warning);
         builder.Logging.AddFilter("Microsoft.AspNetCore.Hosting.Diagnostics", LogLevel.Critical);
         builder.Logging.AddFilter("Microsoft.Hosting.Lifetime", LogLevel.Warning);
 
@@ -101,6 +101,7 @@ public class Program
         builder.Services.AddGrpc();
 
         var app = builder.Build();
+        app.Logger.LogInformation("Starting Application");
 
         app.MapGrpcService<RunFunctionService>();
 

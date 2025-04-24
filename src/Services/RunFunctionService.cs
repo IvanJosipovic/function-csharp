@@ -37,7 +37,7 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
 
         var app = new V1beta1Application()
         {
-            ApiVersion = V1beta1Application.KubeApiVersion,
+            ApiVersion = V1beta1Application.KubeGroup + "/" + V1beta1Application.KubeApiVersion,
             Kind = V1beta1Application.KubeKind,
             Metadata = new()
             {

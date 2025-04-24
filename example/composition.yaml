@@ -4,8 +4,8 @@ metadata:
   name: function-template-csharp
 spec:
   compositeTypeRef:
-    apiVersion: example.crossplane.io/v1
-    kind: XR
+    apiVersion: azuread.company.com/v1alpha1
+    kind: xApplication
   mode: Pipeline
   pipeline:
   - step: run-the-template
