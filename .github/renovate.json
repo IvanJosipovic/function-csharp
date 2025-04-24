@@ -4,8 +4,12 @@
   "timezone": "America/Vancouver",
   "dependencyDashboard": true,
   "semanticCommits": "enabled",
-  "assignees": [ "@ivanjosipovic" ],
-  "extends": [ "config:recommended" ],
+  "assignees": [
+    "@ivanjosipovic"
+  ],
+  "extends": [
+    "config:recommended"
+  ],
   "platformAutomerge": true,
   "ignorePaths": [
     "**/docs/**"
@@ -15,17 +19,17 @@
       "groupName": "KubernetesCRDModelGen",
       "separateMajorMinor": true,
       "groupSlug": "kube-crd-model-gen",
-      "packageRules": [
-        {
-          "matchPackagePatterns": [
-            "KubernetesCRDModelGen",
-            "KubernetesCRDModelGen.*"
-          ]
-        }
+      "matchPackageNames": [
+        "/KubernetesCRDModelGen/",
+        "/KubernetesCRDModelGen.*/"
       ]
     },
     {
-      "matchUpdateTypes": [ "minor", "patch", "digest" ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest"
+      ],
       "automerge": true,
       "matchFileNames": [
         "tests/**",
@@ -33,7 +37,11 @@
       ]
     },
     {
-      "matchUpdateTypes": [ "minor", "patch", "digest" ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest"
+      ],
       "automerge": false,
       "semanticCommitType": "fix",
       "matchFileNames": [
