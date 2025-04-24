@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.70.0" />
-    <PackageReference Include="KubernetesClient" Version="15.0.1" />
+    <PackageReference Include="KubernetesClient" Version="16.0.2" />
     <PackageReference Include="KubernetesCRDModelGen.Models.azure.com" Version="1.0.0-alpha.330" />
     <PackageReference Include="KubernetesCRDModelGen.Models.azuread.upbound.io" Version="1.0.0-alpha.330" />
     <PackageReference Include="KubernetesCRDModelGen.Models.crossplane.io" Version="1.0.0-alpha.330" />
