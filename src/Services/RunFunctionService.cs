@@ -55,10 +55,10 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
             {
                 ManagementPolicies =
                 [
-                    V1beta1ApplicationSpecManagementPoliciesEnum.Observe,
-                    V1beta1ApplicationSpecManagementPoliciesEnum.Create,
-                    V1beta1ApplicationSpecManagementPoliciesEnum.Update,
-                    V1beta1ApplicationSpecManagementPoliciesEnum.LateInitialize,
+                    "Observe",
+                    "Create",
+                    "Update",
+                    "LateInitialize",
                 ],
                 ForProvider = new()
                 {
