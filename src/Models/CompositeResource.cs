@@ -30,7 +30,7 @@ public partial class V1alpha1Application : IKubernetesObject<V1ObjectMeta>, ISpe
 
     /// <summary></summary>
     [JsonPropertyName("status")]
-    public V1CompositeResourceStatus? Status { get; set; }
+    public V1CompositeResourceStatus Status { get; set; }
 }
 
 public partial class V1alpha1ApplicationSpecRequiredResourceAccessResourceAccess

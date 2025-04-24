@@ -105,7 +105,7 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
         return Task.FromResult(resp);
     }
 
-    private V1alpha1EnvironmentConfig GetEnvironmentConfig(RunFunctionRequest request)
+    private static V1alpha1EnvironmentConfig GetEnvironmentConfig(RunFunctionRequest request)
     {
         var formatterSettings = JsonFormatter.Settings.Default.WithFormatDefaultValues(true);
         string json = new JsonFormatter(formatterSettings).Format(request.Context.Fields["apiextensions.crossplane.io/environment"].StructValue);
@@ -113,7 +113,7 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
         return KubernetesJson.Deserialize<V1alpha1EnvironmentConfig>(json);
     }
 
-    private T GetCompositeResource<T>(RunFunctionRequest request)
+    private static T GetCompositeResource<T>(RunFunctionRequest request)
     {
         var formatterSettings = JsonFormatter.Settings.Default.WithFormatDefaultValues(true);
         string json = new JsonFormatter(formatterSettings).Format(request.Observed.Composite.Resource_);
