@@ -17,9 +17,9 @@
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.70.0" />
     <PackageReference Include="KubernetesClient" Version="17.0.4" />
-    <PackageReference Include="KubernetesCRDModelGen.Models.azure.com" Version="1.0.0-alpha.484" />
-    <PackageReference Include="KubernetesCRDModelGen.Models.azuread.upbound.io" Version="1.0.0-alpha.484" />
-    <PackageReference Include="KubernetesCRDModelGen.Models.crossplane.io" Version="1.0.0-alpha.484" />
+    <PackageReference Include="KubernetesCRDModelGen.Models.azure.com" Version="1.0.0-alpha.565" />
+    <PackageReference Include="KubernetesCRDModelGen.Models.azuread.upbound.io" Version="1.0.0-alpha.565" />
+    <PackageReference Include="KubernetesCRDModelGen.Models.crossplane.io" Version="1.0.0-alpha.565" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.2" />
   </ItemGroup>
 
