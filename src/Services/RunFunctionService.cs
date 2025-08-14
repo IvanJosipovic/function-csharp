@@ -1,13 +1,9 @@
-using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using k8s;
 using KubernetesCRDModelGen.Models.applications.azuread.upbound.io;
 using KubernetesCRDModelGen.Models.apiextensions.crossplane.io;
-using Google.Protobuf;
 using k8s.Models;
 using Function.SDK.CSharp.Models;
 using Apiextensions.Fn.Proto.V1;
-using Riok.Mapperly.Abstractions;
 using static Apiextensions.Fn.Proto.V1.FunctionRunnerService;
 
 namespace Function.SDK.CSharp.Services;
@@ -93,39 +89,5 @@ public class RunFunctionService : FunctionRunnerServiceBase
         resp.Desired.AddOrUpdate(name, app);
 
         return Task.FromResult(resp);
-    }
-}
-
-[Mapper]
-public static partial class StructMapper
-{
-    public static partial void Update(this Struct existing, Struct update);
-}
-
-public static class Extensions
-{
-    public static T GetCompositeResource<T>(this RunFunctionRequest request)
-    {
-        var formatterSettings = JsonFormatter.Settings.Default.WithFormatDefaultValues(true);
-        string json = new JsonFormatter(formatterSettings).Format(request.Observed.Composite.Resource_);
-
-        return KubernetesJson.Deserialize<T>(json);
-    }
-
-    public static void AddOrUpdate(this State state, string key, IKubernetesObject obj)
-    {
-        var kubeObj = Struct.Parser.ParseJson(KubernetesJson.Serialize(obj));
-
-        if (state.Resources.TryGetValue(key, out Resource? value))
-        {
-            value.Resource_.Update(kubeObj);
-        }
-        else
-        {
-            state.Resources[key] = new()
-            {
-                Resource_ = kubeObj
-            };
-        }
     }
 }

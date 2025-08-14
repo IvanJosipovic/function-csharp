@@ -4,8 +4,8 @@ metadata:
   name: applications.azuread.company.com
 spec:
   group: azuread.company.com
+  scope: Namespaced
   names:
-    scope: Namespaced
     kind: Application
     plural: applications
   versions:

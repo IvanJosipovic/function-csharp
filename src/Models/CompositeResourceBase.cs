@@ -45,11 +45,12 @@ public partial class V1CompositeResourceSpecCompositionSelector
 
 public enum V1CompositeResourceSpecCompositionUpdatePolicyEnum
 {
-    [EnumMember(Value = "Automatic"), JsonStringEnumMemberName("Automatic")]
     /// <summary>Automatic</summary>
+    [EnumMember(Value = "Automatic"), JsonStringEnumMemberName("Automatic")]
     Automatic,
-    [EnumMember(Value = "Manual"), JsonStringEnumMemberName("Manual")]
+
     /// <summary>Manual</summary>
+    [EnumMember(Value = "Manual"), JsonStringEnumMemberName("Manual")]
     Manual
 }
 
