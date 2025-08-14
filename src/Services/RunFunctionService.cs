@@ -5,8 +5,9 @@ using KubernetesCRDModelGen.Models.applications.azuread.upbound.io;
 using KubernetesCRDModelGen.Models.apiextensions.crossplane.io;
 using Google.Protobuf;
 using k8s.Models;
-using GrpcService;
 using function_csharp.Models;
+using Apiextensions.Fn.Proto.V1;
+using Riok.Mapperly.Abstractions;
 
 namespace function_csharp.Services;
 
@@ -27,13 +28,9 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
 
         Response.Normal(resp, "Running Function");
 
-        var envConfig = GetEnvironmentConfig(request);
+        var compositeResource = request.GetCompositeResource<V1alpha1Application>();
 
-        var envName = envConfig.Data["environmentName"].ToString();
-
-        var compositeResource = GetCompositeResource<V1alpha1Application>(request);
-
-        var name = $"app-terraform-azure-{envName}-{compositeResource.Metadata.Name}";
+        var name = $"app-terraform-azure-{compositeResource.Metadata.Name}";
 
         var app = new V1beta1Application()
         {
@@ -65,7 +62,7 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
                     DisplayName = name,
                     Owners =
                     [
-                        envConfig.Data["terraformServicePrinciple"]["objectId"]!.ToString(),
+                        //envConfig.Data["terraformServicePrinciple"]["objectId"]!.ToString(),
                         ..compositeResource.Spec.Owners
                     ],
                     PreventDuplicateNames = true,
@@ -97,27 +94,42 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
             }
         };
 
-        resp.Desired.Resources[app.Name()] = new Resource()
-        {
-            Resource_ = Struct.Parser.ParseJson(KubernetesJson.Serialize(app))
-        };
+        resp.Desired.AddOrUpdate(name, app);
 
         return Task.FromResult(resp);
     }
+}
 
-    private static V1alpha1EnvironmentConfig GetEnvironmentConfig(RunFunctionRequest request)
-    {
-        var formatterSettings = JsonFormatter.Settings.Default.WithFormatDefaultValues(true);
-        string json = new JsonFormatter(formatterSettings).Format(request.Context.Fields["apiextensions.crossplane.io/environment"].StructValue);
+[Mapper]
+public static partial class StructMapper
+{
+    public static partial void Update(this Struct existing, Struct update);
+}
 
-        return KubernetesJson.Deserialize<V1alpha1EnvironmentConfig>(json);
-    }
-
-    private static T GetCompositeResource<T>(RunFunctionRequest request)
+public static class Extensions
+{
+    public static T GetCompositeResource<T>(this RunFunctionRequest request)
     {
         var formatterSettings = JsonFormatter.Settings.Default.WithFormatDefaultValues(true);
         string json = new JsonFormatter(formatterSettings).Format(request.Observed.Composite.Resource_);
 
         return KubernetesJson.Deserialize<T>(json);
+    }
+
+    public static void AddOrUpdate(this State state, string key, IKubernetesObject obj)
+    {
+        var kubeObj = Struct.Parser.ParseJson(KubernetesJson.Serialize(obj));
+
+        if (state.Resources.TryGetValue(key, out Resource? value))
+        {
+            value.Resource_.Update(kubeObj);
+        }
+        else
+        {
+            state.Resources[key] = new Resource()
+            {
+                Resource_ = kubeObj
+            };
+        }
     }
 }
