@@ -1,9 +1,9 @@
-using function_csharp.Services;
+using Function.SDK.CSharp.Services;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using System.Security.Cryptography.X509Certificates;
 
-namespace function_csharp;
+namespace Function.SDK.CSharp;
 
 //Args:
 // --tls_certs_dir: A directory containing tls.crt, tls.key, and ca.crt.

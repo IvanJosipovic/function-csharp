@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <RootNamespace>function_csharp_tests</RootNamespace>
+    <RootNamespace>Function.SDK.CSharp_tests</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\function-csharp.csproj" />
+    <ProjectReference Include="..\src\Function.SDK.CSharp.csproj" />
   </ItemGroup>
 
   <ItemGroup>

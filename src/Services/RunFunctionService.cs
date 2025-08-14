@@ -5,13 +5,14 @@ using KubernetesCRDModelGen.Models.applications.azuread.upbound.io;
 using KubernetesCRDModelGen.Models.apiextensions.crossplane.io;
 using Google.Protobuf;
 using k8s.Models;
-using function_csharp.Models;
+using Function.SDK.CSharp.Models;
 using Apiextensions.Fn.Proto.V1;
 using Riok.Mapperly.Abstractions;
+using static Apiextensions.Fn.Proto.V1.FunctionRunnerService;
 
-namespace function_csharp.Services;
+namespace Function.SDK.CSharp.Services;
 
-public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBase
+public class RunFunctionService : FunctionRunnerServiceBase
 {
     private readonly ILogger<RunFunctionService> _logger;
 
@@ -38,10 +39,6 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
             Kind = V1beta1Application.KubeKind,
             Metadata = new()
             {
-                Annotations = new Dictionary<string, string>()
-                {
-                    //{ "crossplane.io/external-name", name },
-                },
                 Labels = new Dictionary<string, string>()
                 {
                     { "app.com/name", name }
@@ -62,7 +59,6 @@ public class RunFunctionService : FunctionRunnerService.FunctionRunnerServiceBas
                     DisplayName = name,
                     Owners =
                     [
-                        //envConfig.Data["terraformServicePrinciple"]["objectId"]!.ToString(),
                         ..compositeResource.Spec.Owners
                     ],
                     PreventDuplicateNames = true,
@@ -126,7 +122,7 @@ public static class Extensions
         }
         else
         {
-            state.Resources[key] = new Resource()
+            state.Resources[key] = new()
             {
                 Resource_ = kubeObj
             };

@@ -3,7 +3,7 @@ using k8s.Models;
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
-namespace function_csharp.Models;
+namespace Function.SDK.CSharp.Models;
 
 public enum V1CompositeResourceSpecCompositeDeletePolicyEnum
 {
