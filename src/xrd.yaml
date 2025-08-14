@@ -1,15 +1,13 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
-  name: xapplications.azuread.company.com
+  name: applications.azuread.company.com
 spec:
   group: azuread.company.com
+  scope: Namespaced
   names:
-    kind: xApplication
-    plural: xapplications
-  claimNames:
     kind: Application
-    plural: application
+    plural: applications
   versions:
   - name: v1alpha1
     served: true

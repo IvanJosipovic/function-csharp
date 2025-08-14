@@ -1,22 +1,21 @@
 # Example manifests
 
-You can run your function locally and test it using `crank render`
+You can run your function locally and test it using `crossplane render`
 with these example manifests.
 
-### Download Crank
+### Download Crank and rename to Crossplane
 https://releases.crossplane.io/stable/current/bin
 
 
-# In Docker
+# Run Function In Docker
 ```shell
 # modify functions.yaml and set render.crossplane.io/runtime to Docker
 
-# Run the function locally
 $ docker build -t function-csharp -f ../src/Dockerfile ../src
 $ docker run -it -p 9443:9443 function-csharp
 ```
 
-# In IDE
+# Run Function In IDE
 ```shell
 dotnet debug
 ```
@@ -24,7 +23,7 @@ dotnet debug
 # Run Test
 ```shell
 # Then, in another terminal, call it with these example manifests
-$ crank render xr.yaml composition.yaml functions.yaml --context-files=apiextensions.crossplane.io/environment=./environment-config.json
+$ crossplane render xr.yaml composition.yaml functions.yaml --context-files=apiextensions.crossplane.io/environment=./environment-config.json
 ---
 apiVersion: azuread.company.com/v1alpha1
 kind: xApplication

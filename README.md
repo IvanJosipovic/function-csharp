@@ -1,2 +1,2 @@
-# function-csharp
-C# Crossplane Function
+# function-sdk-csharp
+The C# SDK for writing [composition functions](https://docs.crossplane.io/latest/composition/compositions/).

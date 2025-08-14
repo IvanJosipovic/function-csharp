@@ -2,7 +2,7 @@ using k8s;
 using k8s.Models;
 using System.Text.Json.Serialization;
 
-namespace function_csharp.Models;
+namespace Function.SDK.CSharp.Models;
 
 [KubernetesEntity(Group = KubeGroup, Kind = KubeKind, ApiVersion = KubeApiVersion, PluralName = KubePluralName)]
 public partial class V1alpha1Application : IKubernetesObject<V1ObjectMeta>, ISpec<V1alpha1ApplicationSpec>, IStatus<V1CompositeResourceStatus>

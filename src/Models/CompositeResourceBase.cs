@@ -3,7 +3,7 @@ using k8s.Models;
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
-namespace function_csharp.Models;
+namespace Function.SDK.CSharp.Models;
 
 public enum V1CompositeResourceSpecCompositeDeletePolicyEnum
 {
@@ -45,11 +45,12 @@ public partial class V1CompositeResourceSpecCompositionSelector
 
 public enum V1CompositeResourceSpecCompositionUpdatePolicyEnum
 {
-    [EnumMember(Value = "Automatic"), JsonStringEnumMemberName("Automatic")]
     /// <summary>Automatic</summary>
+    [EnumMember(Value = "Automatic"), JsonStringEnumMemberName("Automatic")]
     Automatic,
-    [EnumMember(Value = "Manual"), JsonStringEnumMemberName("Manual")]
+
     /// <summary>Manual</summary>
+    [EnumMember(Value = "Manual"), JsonStringEnumMemberName("Manual")]
     Manual
 }
 
