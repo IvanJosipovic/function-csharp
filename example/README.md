@@ -23,7 +23,7 @@ dotnet debug
 # Run Test
 ```shell
 # Then, in another terminal, call it with these example manifests
-$ crossplane render xr.yaml composition.yaml functions.yaml --context-files=apiextensions.crossplane.io/environment=./environment-config.json
+$ crossplane render xr.yaml composition.yaml functions.yaml
 ---
 apiVersion: azuread.company.com/v1alpha1
 kind: xApplication

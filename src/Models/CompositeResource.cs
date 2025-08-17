@@ -5,12 +5,12 @@ using System.Text.Json.Serialization;
 namespace Function.SDK.CSharp.Models;
 
 [KubernetesEntity(Group = KubeGroup, Kind = KubeKind, ApiVersion = KubeApiVersion, PluralName = KubePluralName)]
-public partial class V1alpha1Application : IKubernetesObject<V1ObjectMeta>, ISpec<V1alpha1ApplicationSpec>, IStatus<V1CompositeResourceStatus>
+public partial class V1alpha1ETL : IKubernetesObject<V1ObjectMeta>, ISpec<V1alpha1ApplicationSpec>, IStatus<V1CompositeResourceStatus>
 {
     public const string KubeApiVersion = "v1alpha1";
-    public const string KubeKind = "Application";
-    public const string KubeGroup = "azuread.company.com";
-    public const string KubePluralName = "application";
+    public const string KubeKind = "ETL";
+    public const string KubeGroup = "data.company.com";
+    public const string KubePluralName = "etls";
 
     /// <summary></summary>
     [JsonPropertyName("apiVersion")]

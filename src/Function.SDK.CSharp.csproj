@@ -17,12 +17,9 @@
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.71.0" />
     <PackageReference Include="KubernetesClient" Version="17.0.4" />
-    <PackageReference Include="KubernetesCRDModelGen.Models.azure.com" Version="1.0.0-alpha.569" />
-    <PackageReference Include="KubernetesCRDModelGen.Models.azuread.upbound.io" Version="1.0.0-alpha.569" />
-    <PackageReference Include="KubernetesCRDModelGen.Models.crossplane.io" Version="1.0.0-alpha.569" />
-    <PackageReference Include="KubernetesCRDModelGen.Models.databricks.crossplane.io" Version="1.0.0-alpha.569" />
+    <PackageReference Include="KubernetesCRDModelGen.Models.crossplane.io" Version="1.0.0-alpha.570" />
+    <PackageReference Include="KubernetesCRDModelGen.Models.databricks.crossplane.io" Version="1.0.0-alpha.570" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
-    <PackageReference Include="Riok.Mapperly" Version="4.2.1" />
   </ItemGroup>
 
 </Project>

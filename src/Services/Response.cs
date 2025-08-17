@@ -2,7 +2,7 @@
 using Google.Protobuf.WellKnownTypes;
 using System.Text.Json;
 
-namespace Function.SDK.CSharp;
+namespace Function.SDK.CSharp.Services;
 
 // https://github.com/crossplane/function-sdk-python/blob/main/crossplane/function/response.py
 /// <summary>
@@ -22,7 +22,7 @@ public static class Response
     /// <returns>A response to the supplied request.</returns>
     public static RunFunctionResponse To(this RunFunctionRequest request)
     {
-        return To(request, DefaultTTL);
+        return request.To(DefaultTTL);
     }
 
     /// <summary>
@@ -97,7 +97,7 @@ public static class Response
     /// </summary>
     /// <param name="rsp">The RunFunctionResponse to update.</param>
     /// <param name="output">The output data as a Dictionary or protobuf Struct.</param>
-    /// <exception cref="System.TypeAccessException">Thrown if the output type is not supported.</exception>
+    /// <exception cref="TypeAccessException">Thrown if the output type is not supported.</exception>
     public static void SetOutput(RunFunctionResponse rsp, object output)
     {
         rsp.Output = output switch
@@ -130,7 +130,7 @@ public static class Response
         Dictionary<string, string>? matchLabels = null,
         string? @namespace = null)
     {
-        if ((matchName == null) == (matchLabels == null))
+        if (matchName == null == (matchLabels == null))
         {
             throw new ArgumentException("Exactly one of matchName or matchLabels must be provided");
         }

@@ -1,9 +1,9 @@
-using Grpc.Core;
-using KubernetesCRDModelGen.Models.applications.azuread.upbound.io;
-using KubernetesCRDModelGen.Models.apiextensions.crossplane.io;
-using k8s.Models;
-using Function.SDK.CSharp.Models;
 using Apiextensions.Fn.Proto.V1;
+using Function.SDK.CSharp.Models;
+using Google.Protobuf;
+using Grpc.Core;
+using k8s.Models;
+using KubernetesCRDModelGen.Models.security.databricks.crossplane.io;
 using static Apiextensions.Fn.Proto.V1.FunctionRunnerService;
 
 namespace Function.SDK.CSharp.Services;
@@ -25,14 +25,14 @@ public class RunFunctionService : FunctionRunnerServiceBase
 
         Response.Normal(resp, "Running Function");
 
-        var compositeResource = request.GetCompositeResource<V1alpha1Application>();
+        var compositeResource = request.GetCompositeResource<V1alpha1ETL>();
 
-        var name = $"app-terraform-azure-{compositeResource.Metadata.Name}";
+        var name = $"perm-{compositeResource.Metadata.Name}";
 
-        var app = new V1beta1Application()
+        var perm = new V1alpha1Permissions()
         {
-            ApiVersion = V1beta1Application.KubeGroup + "/" + V1beta1Application.KubeApiVersion,
-            Kind = V1beta1Application.KubeKind,
+            ApiVersion = V1alpha1Permissions.KubeGroup + "/" + V1alpha1Permissions.KubeApiVersion,
+            Kind = V1alpha1Permissions.KubeKind,
             Metadata = new()
             {
                 Labels = new Dictionary<string, string>()
@@ -43,50 +43,19 @@ public class RunFunctionService : FunctionRunnerServiceBase
             },
             Spec = new()
             {
-                ManagementPolicies =
-                [
-                    "Observe",
-                    "Create",
-                    "Update",
-                    "LateInitialize",
-                ],
                 ForProvider = new()
                 {
-                    DisplayName = name,
-                    Owners =
-                    [
-                        ..compositeResource.Spec.Owners
-                    ],
-                    PreventDuplicateNames = true,
-                    RequiredResourceAccess = compositeResource.Spec.RequiredResourceAccess?.Select(x => new V1beta1ApplicationSpecForProviderRequiredResourceAccess()
-                    {
-                        ResourceAppId = x.ResourceAppId,
-                        ResourceAccess = x.ResourceAccess?.Select(y => new V1beta1ApplicationSpecForProviderRequiredResourceAccessResourceAccess()
-                        {
-                            Id = y.Id,
-                            Type = y.Type
-                        }).ToList(),
-                    }).ToList(),
-                    SinglePageApplication = compositeResource.Spec.SinglePageApplication?.Select(x => new V1beta1ApplicationSpecForProviderSinglePageApplication()
-                    {
-                        RedirectUris = x.RedirectUris,
-                    }).ToList(),
-                    Web = compositeResource.Spec.Web?.Select(x => new V1beta1ApplicationSpecForProviderWeb()
-                    {
-                        HomepageUrl = x.HomepageUrl,
-                        ImplicitGrant = x.ImplicitGrant?.Select(y => new V1beta1ApplicationSpecForProviderWebImplicitGrant()
-                        {
-                            AccessTokenIssuanceEnabled = y.AccessTokenIssuanceEnabled,
-                            IdTokenIssuanceEnabled = y.IdTokenIssuanceEnabled
-                        }).ToList(),
-                        RedirectUris = x.RedirectUris,
-                        LogoutUrl = x.LogoutUrl,
-                    }).ToList(),
+                    AccessControl = [
+                        new() {
+                            GroupName = "my-grou-1",
+                            PermissionLevel = "CAN_MANAGE"
+                        }
+                    ]
                 }
             }
         };
 
-        resp.Desired.AddOrUpdate(name, app);
+        resp.Desired.AddOrUpdate(name, perm);
 
         return Task.FromResult(resp);
     }
