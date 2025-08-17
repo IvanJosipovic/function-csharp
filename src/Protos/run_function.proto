@@ -29,8 +29,6 @@ import "google/protobuf/struct.proto";
 
 option go_package = "github.com/crossplane/crossplane/v2/proto/fn/v1";
 
-//option csharp_namespace = "GrpcService";
-
 // A FunctionRunnerService is a function.
 service FunctionRunnerService {
   // RunFunction runs the function.

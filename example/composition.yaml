@@ -4,14 +4,11 @@ metadata:
   name: function-template-csharp
 spec:
   compositeTypeRef:
-    apiVersion: azuread.company.com/v1alpha1
-    kind: xApplication
+    apiVersion: data.company.com/v1alpha1
+    kind: ETL
   mode: Pipeline
   pipeline:
   - step: run-the-template
     functionRef:
       name: function-template-csharp
-    input:
-      apiVersion: template.fn.crossplane.io/v1beta1
-      kind: Input
-      example: "Hello world"
+

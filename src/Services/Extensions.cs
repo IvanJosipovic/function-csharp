@@ -9,11 +9,11 @@ public static class Extensions
 {
     public static T GetCompositeResource<T>(this RunFunctionRequest request)
     {
-        var formatterSettings = JsonFormatter.Settings.Default.WithFormatDefaultValues(true);
-        string json = new JsonFormatter(formatterSettings).Format(request.Observed.Composite.Resource_);
+        string json = JsonFormatter.Default.Format(request.Observed.Composite.Resource_);
 
         return KubernetesJson.Deserialize<T>(json);
     }
+
 
     public static void AddOrUpdate(this State state, string key, IKubernetesObject obj)
     {
@@ -21,7 +21,7 @@ public static class Extensions
 
         if (state.Resources.TryGetValue(key, out Resource? value))
         {
-            value.Resource_.Update(kubeObj);
+            value.Resource_.MergeFrom(kubeObj);
         }
         else
         {

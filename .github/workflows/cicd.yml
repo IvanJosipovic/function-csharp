@@ -27,3 +27,6 @@ jobs:
 
     - name: Dotnet Build
       run: dotnet build -c Release
+
+    - name: .NET Test
+      run: dotnet test -c Release --collect:"XPlat Code Coverage"
