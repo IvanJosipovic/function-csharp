@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.github\workflows\cicd.yml = .github\workflows\cicd.yml
 		example\composition.yaml = example\composition.yaml
 		example\functions.yaml = example\functions.yaml
-		example\README.md = example\README.md
+		README.md = README.md
 		example\xr.yaml = example\xr.yaml
 	EndProjectSection
 EndProject
