@@ -3,32 +3,32 @@ The C# SDK for writing [composition functions](https://docs.crossplane.io/latest
 
 
 
-# Example manifests
+## How to Test
 
 You can run your function locally and test it using `crossplane render`
-with these example manifests.
+with the example manifests.
 
 ### Download Crank and rename to Crossplane
 https://releases.crossplane.io/stable/current/bin
 
-
-# Run Function In Docker
-```shell
-# modify functions.yaml and set render.crossplane.io/runtime to Docker
-
-$ docker build -t function-csharp -f ../src/Dockerfile ../src
-$ docker run -it -p 9443:9443 function-csharp
-```
-
-# Run Function In IDE
+## Run Function In IDE
 ```shell
 dotnet debug
 ```
 
-# Run Test
+## Run Function In Docker
 ```shell
-# Then, in another terminal, call it with these example manifests
-$ crossplane render example\xr.yaml example\composition.yaml example\functions.yaml
+docker build -t function-csharp -f ../src/Dockerfile ../src
+docker run -it -p 9443:9443 function-csharp
+```
+
+## Run Test
+Then, in another terminal, call it with these example manifests
+```
+crossplane render example\xr.yaml example\composition.yaml example\functions.yaml
+```
+
+```yaml
 ---
 apiVersion: data.company.com/v1alpha1
 kind: ETL
