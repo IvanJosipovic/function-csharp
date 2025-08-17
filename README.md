@@ -25,7 +25,7 @@ docker run -it -p 9443:9443 function-csharp
 ## Run Test
 Then, in another terminal, call it with these example manifests
 ```
-crossplane render example\xr.yaml example\composition.yaml example\functions.yaml
+crossplane render example/xr.yaml example/composition.yaml example/functions.yaml
 ```
 
 ```yaml
