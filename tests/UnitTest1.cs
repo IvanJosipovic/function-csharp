@@ -66,7 +66,7 @@ public class UnitTest1
             }
         };
 
-        response1.GetDesiredResource<V1alpha1Permissions>("perm-test").ShouldBeEquivalentTo(desiredResource);
+        response1.Desired.GetResource<V1alpha1Permissions>("perm-test").ShouldBeEquivalentTo(desiredResource);
 
         // Update Desired Resource Status and rerun function
 

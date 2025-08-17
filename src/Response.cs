@@ -2,7 +2,7 @@
 using Google.Protobuf.WellKnownTypes;
 using System.Text.Json;
 
-namespace Function.SDK.CSharp.Services;
+namespace Function.SDK.CSharp;
 
 // https://github.com/crossplane/function-sdk-python/blob/main/crossplane/function/response.py
 /// <summary>
