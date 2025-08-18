@@ -228,7 +228,7 @@ namespace Function.SDK.CSharp.SourceGenerator
 
                                 // Append crossplane and status properties to the Composite Resource Model
                                 schema["properties"]["spec"]["properties"]["crossplane"] = JsonNode.Parse(crossplaneProperties)["crossplane"].DeepClone();
-                                schema["properties"]["spec"]["properties"]["status"] = JsonNode.Parse(statusProperties)["status"].DeepClone();
+                                schema["properties"]["status"] = JsonNode.Parse(statusProperties)["status"].DeepClone();
 
                                 var doc = openAPIReader.ReadFragment<OpenApiSchema>(schema, OpenApiSpecVersion.OpenApi3_0, new OpenApiDocument(), out var diag);
 
