@@ -2,6 +2,8 @@
 The C# SDK for writing [composition functions](https://docs.crossplane.io/latest/composition/compositions/).
 
 ## Features
+- XRD to Model Generation
+  - Modify the xrd.yaml and models will be automatically generated
 - CRD to Model Generation
   - Add crd.yaml(s) to the project and models will be automatically generated
   - Most Crossplane Providers already published [KubernetesCRDModelGen](https://github.com/IvanJosipovic/KubernetesCRDModelGen?tab=readme-ov-file#published-packages)
@@ -20,8 +22,6 @@ The C# SDK for writing [composition functions](https://docs.crossplane.io/latest
     | tf.upbound.io | [Link](https://www.nuget.org/packages/KubernetesCRDModelGen.Models.tf.upbound.io/) |
     | upbound.io | [Link](https://www.nuget.org/packages/KubernetesCRDModelGen.Models.upbound.io/) |
     | vault.upbound.io | [Link](https://www.nuget.org/packages/KubernetesCRDModelGen.Models.vault.upbound.io/) |
-- XRD to Model Generation
-  - Modify the xrd.yaml and models will be automatically generated
 
 ## How to Test
 
