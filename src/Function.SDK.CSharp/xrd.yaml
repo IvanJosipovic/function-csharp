@@ -20,6 +20,10 @@ spec:
             type: object
             properties:
               owners:
+                description: some desc
                 type: array
                 items:
                  type: string
+              test:
+                description: some desc
+                type: string

@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Nodes;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
@@ -30,12 +31,14 @@ namespace Function.SDK.CSharp.SourceGenerator
 
             var pipeline = context.AdditionalTextsProvider.Select(static (text, cancellationToken) =>
             {
-                if (!text.Path.EndsWith(".yaml"))
+                var fileName = Path.GetFileName(text.Path);
+
+                if (!fileName.Equals("xrd.yaml"))
                 {
                     return default;
                 }
 
-                return (Name: Path.GetFileName(text.Path), Text: text.GetText(cancellationToken)?.ToString());
+                return (Name: fileName, Text: text.GetText(cancellationToken)?.ToString());
             })
             .Where((pair) => pair is not ((_, null) or (null, _)));
 
@@ -81,7 +84,157 @@ namespace Function.SDK.CSharp.SourceGenerator
                             {
                                 var version = crd.Spec.Versions.First(x => x.Served && x.Referenceable);
 
-                                var doc = openAPIReader.ReadFragment<OpenApiSchema>(version.Schema.OpenAPIV3Schema, OpenApiSpecVersion.OpenApi3_0, new OpenApiDocument(), out var diag);
+                                var crossplaneProperties = """
+                                {
+                                  "crossplane": {
+                                    "description": "Configures how Crossplane will reconcile this composite resource",
+                                    "properties": {
+                                      "compositionRef": {
+                                        "properties": {
+                                          "name": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "name"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      "compositionRevisionRef": {
+                                        "properties": {
+                                          "name": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "name"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      "compositionRevisionSelector": {
+                                        "properties": {
+                                          "matchLabels": {
+                                            "additionalProperties": {
+                                              "type": "string"
+                                            },
+                                            "type": "object"
+                                          }
+                                        },
+                                        "required": [
+                                          "matchLabels"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      "compositionSelector": {
+                                        "properties": {
+                                          "matchLabels": {
+                                            "additionalProperties": {
+                                              "type": "string"
+                                            },
+                                            "type": "object"
+                                          }
+                                        },
+                                        "required": [
+                                          "matchLabels"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      "compositionUpdatePolicy": {
+                                        "default": "Automatic",
+                                        "enum": [
+                                          "Automatic",
+                                          "Manual"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      "resourceRefs": {
+                                        "items": {
+                                          "properties": {
+                                            "apiVersion": {
+                                              "type": "string"
+                                            },
+                                            "kind": {
+                                              "type": "string"
+                                            },
+                                            "name": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "apiVersion",
+                                            "kind"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        "type": "array",
+                                        "x-kubernetes-list-type": "atomic"
+                                      }
+                                    },
+                                    "type": "object"
+                                  }
+                                }
+                                """;
+
+                                var statusProperties = """
+                                {
+                                  "status": {
+                                    "properties": {
+                                      "conditions": {
+                                        "description": "Conditions of the resource.",
+                                        "items": {
+                                          "properties": {
+                                            "lastTransitionTime": {
+                                              "format": "date-time",
+                                              "type": "string"
+                                            },
+                                            "message": {
+                                              "type": "string"
+                                            },
+                                            "observedGeneration": {
+                                              "format": "int64",
+                                              "type": "integer"
+                                            },
+                                            "reason": {
+                                              "type": "string"
+                                            },
+                                            "status": {
+                                              "type": "string"
+                                            },
+                                            "type": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "lastTransitionTime",
+                                            "reason",
+                                            "status",
+                                            "type"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        "type": "array",
+                                        "x-kubernetes-list-map-keys": [
+                                          "type"
+                                        ],
+                                        "x-kubernetes-list-type": "map"
+                                      }
+                                    },
+                                    "type": "object"
+                                  }
+                                }
+                                """;
+
+                                var schema = version.Schema.OpenAPIV3Schema;
+
+                                // Append crossplane and status properties to the Models
+                                var crossplanePropertiesJson = JsonNode.Parse(crossplaneProperties);
+                                var statusPropertiesJson = JsonNode.Parse(statusProperties);
+
+                                schema["properties"]["spec"]["properties"]["crossplane"] = crossplanePropertiesJson["crossplane"].DeepClone();
+
+                                schema["properties"]["spec"]["properties"]["status"] = statusPropertiesJson["status"].DeepClone();
+
+                                var doc = openAPIReader.ReadFragment<OpenApiSchema>(schema, OpenApiSpecVersion.OpenApi3_0, new OpenApiDocument(), out var diag);
 
                                 if (diag != null && diag.Errors.Count > 0)
                                 {
