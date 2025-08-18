@@ -15,15 +15,18 @@ spec:
     schema:
       openAPIV3Schema:
         type: object
+        required:
+        - spec
         properties:
           spec:
+            description: ETL Specification
             type: object
             properties:
               owners:
-                description: some desc
+                description: array desc
                 type: array
                 items:
                  type: string
               test:
-                description: some desc
+                description: string desc
                 type: string
