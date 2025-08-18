@@ -23,7 +23,7 @@ dotnet debug
 
 ## Run Function In Docker
 ```shell
-docker build -t function-sdk-csharp -f src/Dockerfile src
+docker build -t function-sdk-csharp -f src/Function.SDK.CSharp/Dockerfile src
 docker run -it -p 9443:9443 function-sdk-csharp
 ```
 
