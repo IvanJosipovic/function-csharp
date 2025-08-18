@@ -7,7 +7,6 @@
     <RootNamespace>Function.SDK.CSharp</RootNamespace>
     <UserSecretsId>ef583378-5173-4032-b456-28a137cfb664</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <DockerfileContext>.</DockerfileContext>
   </PropertyGroup>
 
   <ItemGroup>
