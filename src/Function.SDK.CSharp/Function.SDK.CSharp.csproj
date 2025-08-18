@@ -15,6 +15,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="xrd.schema.json" />
+    <None Include="xrd.schema.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.71.0" />
     <PackageReference Include="KubernetesClient" Version="17.0.4" />
     <PackageReference Include="KubernetesCRDModelGen.Models.crossplane.io" Version="1.0.0-alpha.581" />
