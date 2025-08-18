@@ -1,8 +1,6 @@
 using Apiextensions.Fn.Proto.V1;
-using Function.SDK.CSharp.Models;
-using Google.Protobuf;
+using Function.SDK.CSharp.SourceGenerator.Models.data.company.com;
 using Grpc.Core;
-using k8s.Models;
 using KubernetesCRDModelGen.Models.security.databricks.crossplane.io;
 using static Apiextensions.Fn.Proto.V1.FunctionRunnerService;
 
@@ -23,7 +21,7 @@ public class RunFunctionService : FunctionRunnerServiceBase
 
         var resp = request.To(Response.DefaultTTL);
 
-        Response.Normal(resp, "Running Function");
+        resp.Normal("Running Function");
 
         var compositeResource = request.GetCompositeResource<V1alpha1ETL>();
 

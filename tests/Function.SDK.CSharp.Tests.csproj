@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Function.SDK.CSharp.csproj" />
+    <ProjectReference Include="..\src\Function.SDK.CSharp\Function.SDK.CSharp.csproj" />
   </ItemGroup>
 
   <ItemGroup>

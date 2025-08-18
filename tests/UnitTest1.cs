@@ -1,11 +1,11 @@
 using Apiextensions.Fn.Proto.V1;
-using Function.SDK.CSharp.Models;
 using Function.SDK.CSharp.Services;
-using Google.Protobuf;
+using Function.SDK.CSharp.SourceGenerator.Models.data.company.com;
 using Google.Protobuf.WellKnownTypes;
-using Grpc.Core;
+using Google.Protobuf;
 using Grpc.Core.Testing;
 using Grpc.Core.Utils;
+using Grpc.Core;
 using k8s;
 using KubernetesCRDModelGen.Models.security.databricks.crossplane.io;
 using Microsoft.Extensions.Logging;
