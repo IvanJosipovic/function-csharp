@@ -1,7 +1,12 @@
 # function-sdk-csharp
 The C# SDK for writing [composition functions](https://docs.crossplane.io/latest/composition/compositions/).
 
-
+## Features
+- CRD to Model Generation
+  - Add crd.yaml(s) to the project and models will be automatically generated 
+  - Most Crossplane Providers already published [KubernetesCRDModelGen](https://github.com/IvanJosipovic/KubernetesCRDModelGen?tab=readme-ov-file#published-packages)
+- XRD to Model Generation
+  - Modify the xrd.yaml and models will be automatically generated
 
 ## How to Test
 

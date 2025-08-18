@@ -1,5 +1,6 @@
 ﻿using Apiextensions.Fn.Proto.V1;
 using Google.Protobuf.WellKnownTypes;
+using k8s;
 using System.Text.Json;
 
 namespace Function.SDK.CSharp;
@@ -52,7 +53,7 @@ public static class Response
     /// </summary>
     /// <param name="rsp"></param>
     /// <param name="message"></param>
-    public static void Normal(RunFunctionResponse rsp, string message)
+    public static void Normal(this RunFunctionResponse rsp, string message)
     {
         rsp.Results.Add(new Result
         {
@@ -66,7 +67,7 @@ public static class Response
     /// </summary>
     /// <param name="rsp"></param>
     /// <param name="message"></param>
-    public static void Warning(RunFunctionResponse rsp, string message)
+    public static void Warning(this RunFunctionResponse rsp, string message)
     {
         rsp.Results.Add(new Result
         {
@@ -80,7 +81,7 @@ public static class Response
     /// </summary>
     /// <param name="rsp"></param>
     /// <param name="message"></param>
-    public static void Fatal(RunFunctionResponse rsp, string message)
+    public static void Fatal(this RunFunctionResponse rsp, string message)
     {
         rsp.Results.Add(new Result
         {
@@ -98,7 +99,7 @@ public static class Response
     /// <param name="rsp">The RunFunctionResponse to update.</param>
     /// <param name="output">The output data as a Dictionary or protobuf Struct.</param>
     /// <exception cref="TypeAccessException">Thrown if the output type is not supported.</exception>
-    public static void SetOutput(RunFunctionResponse rsp, object output)
+    public static void SetOutput(this RunFunctionResponse rsp, object output)
     {
         rsp.Output = output switch
         {
@@ -106,6 +107,23 @@ public static class Response
             Struct s => s,
             _ => throw new TypeAccessException($"Unsupported output type: {output?.GetType()}"),
         };
+    }
+
+    public static void AddOrUpdate(this State state, string key, IKubernetesObject obj)
+    {
+        var kubeObj = Struct.Parser.ParseJson(KubernetesJson.Serialize(obj));
+
+        if (state.Resources.TryGetValue(key, out Resource? value))
+        {
+            value.Resource_.MergeFrom(kubeObj);
+        }
+        else
+        {
+            state.Resources[key] = new()
+            {
+                Resource_ = kubeObj
+            };
+        }
     }
 
     /// <summary>
@@ -122,7 +140,7 @@ public static class Response
     /// <param name="namespace">The namespace to search in (optional).</param>
     /// <exception cref="ArgumentException">Thrown if both matchName and matchLabels are provided, or neither.</exception>
     public static void RequireResources(
-        RunFunctionResponse rsp,
+        this RunFunctionResponse rsp,
         string name,
         string apiVersion,
         string kind,
