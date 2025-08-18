@@ -17,6 +17,7 @@ with the example manifests.
 https://releases.crossplane.io/stable/current/bin
 
 ## Run Function In IDE
+Download the lastest [.NET 9 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
 ```shell
 dotnet debug
 ```
