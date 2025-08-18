@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <Protobuf Include="Protos\run_function.proto" GrpcServices="Server" />
-    <AdditionalFiles Include="xrd.yaml" />
+    <AdditionalFiles Include="*.yaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,6 +19,7 @@
     <PackageReference Include="KubernetesClient" Version="17.0.4" />
     <PackageReference Include="KubernetesCRDModelGen.Models.crossplane.io" Version="1.0.0-alpha.581" />
     <PackageReference Include="KubernetesCRDModelGen.Models.databricks.crossplane.io" Version="1.0.0-alpha.581" />
+    <PackageReference Include="KubernetesCRDModelGen.SourceGenerator" Version="1.0.0-alpha.581" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
     <PackageReference Include="System.Text.Json" Version="9.0.8" />
   </ItemGroup>
