@@ -4,7 +4,7 @@ using Grpc.Core;
 using KubernetesCRDModelGen.Models.security.databricks.crossplane.io;
 using static Apiextensions.Fn.Proto.V1.FunctionRunnerService;
 
-namespace Function.SDK.CSharp.Services;
+namespace Function.SDK.CSharp.Sample;
 
 public class RunFunctionService : FunctionRunnerServiceBase
 {

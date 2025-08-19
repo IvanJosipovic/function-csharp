@@ -13,5 +13,4 @@ public static class Request
 
         return KubernetesJson.Deserialize<T>(json);
     }
-
 }

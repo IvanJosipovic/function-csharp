@@ -19,6 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Function.SDK.CSharp.SourceGenerator", "src\Function.SDK.CSharp.SourceGenerator\Function.SDK.CSharp.SourceGenerator.csproj", "{78CA6808-7D0E-09E1-E1A2-7F22CB63C5EC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Function.SDK.CSharp.Sample", "src\Function.SDK.CSharp.Sample\Function.SDK.CSharp.Sample.csproj", "{FF67A964-B6B3-ECE8-39BE-40E9DB0DE130}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,10 @@ Global
 		{78CA6808-7D0E-09E1-E1A2-7F22CB63C5EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78CA6808-7D0E-09E1-E1A2-7F22CB63C5EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78CA6808-7D0E-09E1-E1A2-7F22CB63C5EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF67A964-B6B3-ECE8-39BE-40E9DB0DE130}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF67A964-B6B3-ECE8-39BE-40E9DB0DE130}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF67A964-B6B3-ECE8-39BE-40E9DB0DE130}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF67A964-B6B3-ECE8-39BE-40E9DB0DE130}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

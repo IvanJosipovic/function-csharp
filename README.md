@@ -22,6 +22,7 @@ The C# SDK for writing [composition functions](https://docs.crossplane.io/latest
     | tf.upbound.io | [Link](https://www.nuget.org/packages/KubernetesCRDModelGen.Models.tf.upbound.io/) |
     | upbound.io | [Link](https://www.nuget.org/packages/KubernetesCRDModelGen.Models.upbound.io/) |
     | vault.upbound.io | [Link](https://www.nuget.org/packages/KubernetesCRDModelGen.Models.vault.upbound.io/) |
+- Supports Crossplane v1.17 or greater
 
 ## How to Test
 
@@ -39,7 +40,7 @@ dotnet debug
 
 ## Run Function In Docker
 ```shell
-docker build -t function-sdk-csharp -f src/Function.SDK.CSharp/Dockerfile src
+docker build -t function-sdk-csharp -f src/Function.SDK.CSharp.Sample/Dockerfile src
 docker run -it -p 9443:9443 function-sdk-csharp
 ```
 
