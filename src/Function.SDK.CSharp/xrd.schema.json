@@ -376,8 +376,7 @@
                 "properties": {
                   "openAPIV3Schema": {
                     "description": "OpenAPIV3Schema is the OpenAPI v3 schema to use for validation and\npruning.",
-                    "type": "object",
-                    "x-kubernetes-preserve-unknown-fields": true
+                    "$ref": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/refs/heads/master/master/jsonschemaprops.json"
                   }
                 },
                 "type": "object"
