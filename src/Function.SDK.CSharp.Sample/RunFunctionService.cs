@@ -60,13 +60,10 @@ public class RunFunctionService : FunctionRunnerServiceBase
                     AccountReplicationType = "LRS",
                     Location = @params.Location.AsString(EnumFormat.EnumMemberValue),
                     InfrastructureEncryptionEnabled = true,
-                    BlobProperties =
-                    [
-                        new()
-                        {
-                            VersioningEnabled = @params.Versioning
-                        }
-                    ],
+                    BlobProperties = new()
+                    {
+                        VersioningEnabled = @params.Versioning
+                    },
                     ResourceGroupNameSelector = new()
                     {
                         MatchLabels = new Dictionary<string, string>()
