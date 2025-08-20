@@ -14,7 +14,7 @@ on:
 
 jobs:
   build-test:
-    name: Create Release
+    name: Build & Test
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
