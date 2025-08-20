@@ -4,6 +4,7 @@ kind: CompositeResourceDefinition
 metadata:
   name: xstoragebuckets.platform.example.com
 spec:
+  scope: Namespaced
   claimNames:
     kind: StorageBucket
     plural: storagebuckets

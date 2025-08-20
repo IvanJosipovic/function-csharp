@@ -1,24 +1,25 @@
 using Apiextensions.Fn.Proto.V1;
-using Function.SDK.CSharp.Services;
-using Function.SDK.CSharp.SourceGenerator.Models.data.company.com;
+using Function.SDK.CSharp.SourceGenerator.Models.platform.example.com;
 using Google.Protobuf.WellKnownTypes;
 using Google.Protobuf;
 using Grpc.Core.Testing;
 using Grpc.Core.Utils;
 using Grpc.Core;
 using k8s;
-using KubernetesCRDModelGen.Models.security.databricks.crossplane.io;
+using KubernetesCRDModelGen.Models.storage.azure.m.upbound.io;
 using Microsoft.Extensions.Logging;
 using Shouldly;
+using KubernetesCRDModelGen.Models.azure.m.upbound.io;
+using EnumsNET;
 
-namespace Function.SDK.CSharp.Test;
+namespace Function.SDK.CSharp.Sample.Tests;
 
 public class UnitTest1
 {
     [Fact]
     public void Test1()
     {
-        var xr = new V1alpha1ETL()
+        var xr = new V1alpha1XStorageBucket()
         {
             Metadata = new()
             {
@@ -27,10 +28,12 @@ public class UnitTest1
             },
             Spec = new()
             {
-                Owners = [
-                            "test1",
-                            "test2"
-                         ]
+                Parameters = new()
+                {
+                    Location = V1alpha1XStorageBucketSpecParametersLocationEnum.Eastus,
+                    Versioning = true,
+                    Acl = V1alpha1XStorageBucketSpecParametersAclEnum.Private,
+                }
             }
         };
 
@@ -39,76 +42,54 @@ public class UnitTest1
 
         var response1 = request.GetTestResponse();
 
-        var desiredResource = new V1alpha1Permissions()
+        var desiredResource = new V1beta1ResourceGroup()
         {
-            ApiVersion = V1alpha1Permissions.KubeGroup + "/" + V1alpha1Permissions.KubeApiVersion,
-            Kind = V1alpha1Permissions.KubeKind,
-            Metadata = new()
-            {
-                Labels = new Dictionary<string, string>()
-                {
-                    { "app.com/name", "perm-test" }
-                },
-                Name = "perm-test",
-            },
+            ApiVersion = V1beta1ResourceGroup.KubeGroup + "/" + V1beta1ResourceGroup.KubeApiVersion,
+            Kind = V1beta1ResourceGroup.KubeKind,
             Spec = new()
             {
                 ForProvider = new()
                 {
-                    AccessControl = [
-                        new()
-                        {
-                            GroupName = "my-grou-1",
-                            PermissionLevel = "CAN_MANAGE"
-                        }
-                    ]
+                    Location = xr.Spec.Parameters.Location.AsString(EnumFormat.EnumMemberValue)
                 }
             }
         };
 
-        response1.Desired.GetResource<V1alpha1Permissions>("perm-test").ShouldBeEquivalentTo(desiredResource);
+        response1.Desired.GetResource<V1beta1ResourceGroup>("rg").ShouldBeEquivalentTo(desiredResource);
 
         // Update Desired Resource Status and rerun function
 
-        var perm2 = new V1alpha1Permissions()
+        var desiredResource2 = new V1beta1ResourceGroup()
         {
-            ApiVersion = V1alpha1Permissions.KubeGroup + "/" + V1alpha1Permissions.KubeApiVersion,
-            Kind = V1alpha1Permissions.KubeKind,
-            Metadata = new()
-            {
-                Labels = new Dictionary<string, string>()
-                {
-                    { "app.com/name", "perm-test" }
-                },
-                Name = "perm-test",
-            },
+            ApiVersion = V1beta1ResourceGroup.KubeGroup + "/" + V1beta1ResourceGroup.KubeApiVersion,
+            Kind = V1beta1ResourceGroup.KubeKind,
             Spec = new()
             {
                 ForProvider = new()
                 {
-                    AccessControl = [
-                new()
-                        {
-                            GroupName = "my-grou-1",
-                            PermissionLevel = "CAN_MANAGE"
-                        }
-            ]
+                    Location = xr.Spec.Parameters.Location.AsString(EnumFormat.EnumMemberValue)
                 }
             },
             Status = new()
             {
-                ObservedGeneration = 1
+                Conditions =
+                [
+                    new()
+                    {
+                        Status = "Ready"
+                    }
+                ]
             }
         };
 
         var request2 = TestExtensions.GetFunctionRequest();
         request2.SetCompositeResource(xr);
 
-        request2.Desired.AddOrUpdate("perm-test", perm2);
+        request2.Desired.AddOrUpdate("rg", desiredResource2);
 
         var response2 = request2.GetTestResponse();
 
-        response2.Desired.GetResource<V1alpha1Permissions>("perm-test").ShouldBeEquivalentTo(perm2);
+        response2.Desired.GetResource<V1beta1ResourceGroup>("rg").ShouldBeEquivalentTo(desiredResource2);
     }
 }
 
