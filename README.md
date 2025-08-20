@@ -52,39 +52,83 @@ crossplane render example/xr.yaml example/composition.yaml example/functions.yam
 
 ```yaml
 ---
-apiVersion: data.company.com/v1alpha1
-kind: ETL
+apiVersion: platform.example.com/v1alpha1
+kind: XStorageBucket
 metadata:
-  name: example-xr
+  name: example
 status:
   conditions:
   - lastTransitionTime: "2024-01-01T00:00:00Z"
-    message: 'Unready resources: perm-example-xr'
+    message: 'Unready resources: account, container, and rg'
     reason: Creating
     status: "False"
     type: Ready
 ---
-apiVersion: security.databricks.crossplane.io/v1alpha1
-kind: Permissions
+apiVersion: storage.azure.upbound.io/v1beta1
+kind: Account
 metadata:
   annotations:
-    crossplane.io/composition-resource-name: perm-example-xr
-  generateName: example-xr-
+    crossplane.io/composition-resource-name: account
   labels:
-    app.com/name: perm-example-xr
-    crossplane.io/composite: example-xr
-  name: perm-example-xr
+    crossplane.io/composite: example
+  name: example
   ownerReferences:
-  - apiVersion: data.company.com/v1alpha1
+  - apiVersion: platform.example.com/v1alpha1
     blockOwnerDeletion: true
     controller: true
-    kind: ETL
-    name: example-xr
+    kind: XStorageBucket
+    name: example
     uid: ""
 spec:
   forProvider:
-    accessControl:
-    - groupName: my-grou-1
-      permissionLevel: CAN_MANAGE
-
+    accountReplicationType: LRS
+    accountTier: Standard
+    blobProperties:
+    - versioningEnabled: true
+    infrastructureEncryptionEnabled: true
+    location: eastus
+    resourceGroupNameSelector:
+      matchLabels:
+        matchControllerRef: "True"
+---
+apiVersion: storage.azure.upbound.io/v1beta1
+kind: Container
+metadata:
+  annotations:
+    crossplane.io/composition-resource-name: container
+  generateName: example-
+  labels:
+    crossplane.io/composite: example
+  ownerReferences:
+  - apiVersion: platform.example.com/v1alpha1
+    blockOwnerDeletion: true
+    controller: true
+    kind: XStorageBucket
+    name: example
+    uid: ""
+spec:
+  forProvider:
+    containerAccessType: public
+    storageAccountNameSelector:
+      matchLabels:
+        matchControllerRef: "True"
+---
+apiVersion: azure.upbound.io/v1beta1
+kind: ResourceGroup
+metadata:
+  annotations:
+    crossplane.io/composition-resource-name: rg
+  generateName: example-
+  labels:
+    crossplane.io/composite: example
+  ownerReferences:
+  - apiVersion: platform.example.com/v1alpha1
+    blockOwnerDeletion: true
+    controller: true
+    kind: XStorageBucket
+    name: example
+    uid: ""
+spec:
+  forProvider:
+    location: eastus
 ```

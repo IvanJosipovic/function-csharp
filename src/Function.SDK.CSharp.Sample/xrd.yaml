@@ -2,32 +2,156 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
-  name: etls.data.company.com
+  name: xstoragebuckets.platform.example.com
 spec:
-  group: data.company.com
-  scope: Namespaced
+  claimNames:
+    kind: StorageBucket
+    plural: storagebuckets
+  group: platform.example.com
   names:
-    kind: ETL
-    plural: etls
+    categories:
+    - crossplane
+    kind: XStorageBucket
+    plural: xstoragebuckets
   versions:
   - name: v1alpha1
-    served: true
     referenceable: true
     schema:
       openAPIV3Schema:
-        type: object
-        required:
-        - spec
+        description: StorageBucket is the Schema for the StorageBucket API.
         properties:
           spec:
-            description: ETL Specification
-            type: object
+            description: StorageBucketSpec defines the desired state of StorageBucket.
             properties:
-              owners:
-                description: array desc
-                type: array
-                items:
-                 type: string
-              test:
-                description: string desc
-                type: string
+              parameters:
+                properties:
+                  acl:
+                    description: Access control list for the storage bucket
+                    type: string
+                    enum:
+                    - private
+                    - public
+                    - blob
+                  location:
+                    description: Geographic location where the storage bucket will be created
+                    type: string
+                    enum:
+                    - 'asia'
+                    - 'asiapacific'
+                    - 'australia'
+                    - 'australiacentral'
+                    - 'australiacentral2'
+                    - 'australiaeast'
+                    - 'australiasoutheast'
+                    - 'austriaeast'
+                    - 'brazil'
+                    - 'brazilsouth'
+                    - 'brazilsoutheast'
+                    - 'brazilus'
+                    - 'canada'
+                    - 'canadacentral'
+                    - 'canadaeast'
+                    - 'centralindia'
+                    - 'centralus'
+                    - 'centraluseuap'
+                    - 'centralusstage'
+                    - 'chilecentral'
+                    - 'eastasia'
+                    - 'eastasiastage'
+                    - 'eastus'
+                    - 'eastus2'
+                    - 'eastus2euap'
+                    - 'eastus2stage'
+                    - 'eastusstage'
+                    - 'eastusstg'
+                    - 'europe'
+                    - 'france'
+                    - 'francecentral'
+                    - 'francesouth'
+                    - 'germany'
+                    - 'germanynorth'
+                    - 'germanywestcentral'
+                    - 'global'
+                    - 'india'
+                    - 'indonesia'
+                    - 'indonesiacentral'
+                    - 'israel'
+                    - 'israelcentral'
+                    - 'italy'
+                    - 'italynorth'
+                    - 'japan'
+                    - 'japaneast'
+                    - 'japanwest'
+                    - 'jioindiacentral'
+                    - 'jioindiawest'
+                    - 'korea'
+                    - 'koreacentral'
+                    - 'koreasouth'
+                    - 'malaysia'
+                    - 'malaysiawest'
+                    - 'mexico'
+                    - 'mexicocentral'
+                    - 'newzealand'
+                    - 'newzealandnorth'
+                    - 'northcentralus'
+                    - 'northcentralusstage'
+                    - 'northeurope'
+                    - 'norway'
+                    - 'norwayeast'
+                    - 'norwaywest'
+                    - 'poland'
+                    - 'polandcentral'
+                    - 'qatar'
+                    - 'qatarcentral'
+                    - 'singapore'
+                    - 'southafrica'
+                    - 'southafricanorth'
+                    - 'southafricawest'
+                    - 'southcentralus'
+                    - 'southcentralusstage'
+                    - 'southcentralusstg'
+                    - 'southeastasia'
+                    - 'southeastasiastage'
+                    - 'southindia'
+                    - 'spain'
+                    - 'spaincentral'
+                    - 'sweden'
+                    - 'swedencentral'
+                    - 'switzerland'
+                    - 'switzerlandnorth'
+                    - 'switzerlandwest'
+                    - 'taiwan'
+                    - 'uae'
+                    - 'uaecentral'
+                    - 'uaenorth'
+                    - 'uk'
+                    - 'uksouth'
+                    - 'ukwest'
+                    - 'unitedstates'
+                    - 'unitedstateseuap'
+                    - 'westcentralus'
+                    - 'westeurope'
+                    - 'westindia'
+                    - 'westus'
+                    - 'westus2'
+                    - 'westus2stage'
+                    - 'westus3'
+                    - 'westusstage'
+                  versioning:
+                    description: Enable versioning to maintain multiple versions of objects in the bucket
+                    type: boolean
+                type: object
+                required:
+                - acl
+                - location
+                - versioning
+            type: object
+            required:
+            - parameters
+          status:
+            description: StorageBucketStatus defines the observed state of StorageBucket.
+            type: object
+        required:
+        - spec
+        type: object
+    served: true

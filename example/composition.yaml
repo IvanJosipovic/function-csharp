@@ -4,11 +4,10 @@ metadata:
   name: function-template-csharp
 spec:
   compositeTypeRef:
-    apiVersion: data.company.com/v1alpha1
-    kind: ETL
+    apiVersion: platform.example.com/v1alpha1
+    kind: XStorageBucket
   mode: Pipeline
   pipeline:
   - step: run-the-template
     functionRef:
       name: function-template-csharp
-

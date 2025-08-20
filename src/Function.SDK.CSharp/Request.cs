@@ -7,7 +7,7 @@ namespace Function.SDK.CSharp;
 
 public static class Request
 {
-    public static T GetCompositeResource<T>(this RunFunctionRequest request)
+    public static T GetObservedCompositeResource<T>(this RunFunctionRequest request)
     {
         string json = JsonFormatter.Default.Format(request.Observed.Composite.Resource_);
 

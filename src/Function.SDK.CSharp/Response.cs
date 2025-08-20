@@ -109,6 +109,12 @@ public static class Response
         };
     }
 
+    /// <summary>
+    /// Adds Desired Resource or merges with an exiting one
+    /// </summary>
+    /// <param name="state"></param>
+    /// <param name="key"></param>
+    /// <param name="obj"></param>
     public static void AddOrUpdate(this State state, string key, IKubernetesObject obj)
     {
         var kubeObj = Struct.Parser.ParseJson(KubernetesJson.Serialize(obj));
