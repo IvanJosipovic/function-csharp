@@ -4,33 +4,21 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>Function.SDK.CSharp</RootNamespace>
-    <UserSecretsId>ef583378-5173-4032-b456-28a137cfb664</UserSecretsId>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <Protobuf Include="Protos\run_function.proto" GrpcServices="Server" />
-    <AdditionalFiles Include="*.yaml" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Remove="xrd.schema.json" />
-    <None Include="xrd.schema.json" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="Enums.NET" Version="5.0.0" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.71.0" />
     <PackageReference Include="KubernetesClient" Version="17.0.4" />
-    <PackageReference Include="KubernetesCRDModelGen.Models.crossplane.io" Version="1.0.0-alpha.583" />
-    <PackageReference Include="KubernetesCRDModelGen.Models.databricks.crossplane.io" Version="1.0.0-alpha.583" />
-    <PackageReference Include="KubernetesCRDModelGen.SourceGenerator" Version="1.0.0-alpha.583" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
-    <PackageReference Include="System.Text.Json" Version="9.0.8" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Function.SDK.CSharp.SourceGenerator\Function.SDK.CSharp.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
+    <Folder Include="Properties\" />
   </ItemGroup>
 
 </Project>

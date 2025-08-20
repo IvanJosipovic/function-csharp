@@ -1,9 +1,9 @@
-# Replace this with your XR!
-apiVersion: data.company.com/v1alpha1
-kind: ETL
+apiVersion: platform.example.com/v1alpha1
+kind: XStorageBucket
 metadata:
-  name: example-xr
+  name: example
 spec:
-  owners:
-    - owner1@example.com
-    - owner2@example.com
+  parameters:
+    location: eastus
+    versioning: true
+    acl: public
