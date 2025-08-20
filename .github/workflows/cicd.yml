@@ -29,7 +29,7 @@ jobs:
       run: dotnet build -c Release
 
     - name: .NET Test
-      run: dotnet test -c Release --collect:"XPlat Code Coverage"
+      run: dotnet test -c Release --collect:"XPlat Code Coverage" --logger "trx;LogFileName=test-results.trx"
 
     - name: Coverage
       uses: codecov/codecov-action@v5
