@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using static Apiextensions.Fn.Proto.V1.FunctionRunnerService;
@@ -76,6 +77,7 @@ public static class BuilderExtensions
         builder.WebHost.UseUrls(GetAddress());
 
         var tls = GetTLSCertDir();
+
         if (IsInsecure() == false && tls != null)
         {
             builder.WebHost.UseKestrelHttpsConfiguration();
@@ -87,6 +89,7 @@ public static class BuilderExtensions
                 opts.AllowedCertificateTypes = CertificateTypes.All;
                 opts.RevocationMode = X509RevocationMode.NoCheck;
                 opts.ValidateCertificateUse = false;
+                opts.ValidateValidityPeriod = false;
             });
         }
         else
@@ -128,7 +131,9 @@ public static class BuilderExtensions
     /// <param name="app"></param>
     public static void MapFunctionService<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] TService>(this WebApplication app) where TService : FunctionRunnerServiceBase
     {
-        app.Logger.LogInformation("Starting Application");
+        var versionAttribute = Assembly.GetEntryAssembly()!.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion;
+
+        app.Logger.LogInformation("Starting Application v{version}", versionAttribute);
 
         app.UseAuthentication();
 
