@@ -99,25 +99,26 @@ public static class BuilderExtensions
                             SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13,
                             ServerCertificateChain = [.. new X509Certificate2[] { ca, serverCert }],
 
-                            //ClientCertificateValidation = (cert, chain, errors) =>
-                            //{
-                            //    using var custom = new X509Chain
-                            //    {
-                            //        ChainPolicy =
-                            //        {
-                            //            TrustMode = X509ChainTrustMode.CustomRootTrust,
-                            //            RevocationMode = X509RevocationMode.NoCheck,
-                            //            VerificationFlags = X509VerificationFlags.NoFlag
-                            //        }
-                            //    };
+                            ClientCertificateValidation = (cert, chain, errors) =>
+                            {
+                                using var custom = new X509Chain
+                                {
+                                    ChainPolicy =
+                                    {
+                                        TrustMode = X509ChainTrustMode.CustomRootTrust,
+                                        RevocationMode = X509RevocationMode.NoCheck,
+                                        VerificationFlags = X509VerificationFlags.NoFlag
+                                    }
+                                };
 
-                            //    custom.ChainPolicy.CustomTrustStore.Add(ca);
+                                custom.ChainPolicy.CustomTrustStore.Add(ca);
 
-                            //    return custom.Build(cert);
-                            //},
+                                return custom.Build(cert);
+                            },
                         };
 
-                        adapter.AllowAnyClientCertificate();
+                        // Disables Client Cert Validation
+                        //adapter.AllowAnyClientCertificate();
 
                         listenOptions.UseHttps(adapter);
                     }
