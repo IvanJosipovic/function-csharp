@@ -88,11 +88,15 @@ public static class BuilderExtensions
                 {
                     Console.WriteLine("Using TLS with certs from: " + tls);
 
-                    var clientCa = X509Certificate2.CreateFromPem(Path.Combine(tls, "ca.crt"));
+                    Console.WriteLine("Load CA cert");
+                    var clientCa = X509CertificateLoader.LoadCertificateFromFile(Path.Combine(tls, "ca.crt"));
+
+                    Console.WriteLine("Load Server cert");
+                    var srverCert = X509Certificate2.CreateFromPemFile(Path.Combine(tls, "tls.crt"), Path.Combine(tls, "tls.key"));
 
                     lo.UseHttps(new HttpsConnectionAdapterOptions
                     {
-                        ServerCertificate = X509Certificate2.CreateFromPemFile(Path.Combine(tls, "tls.crt"), Path.Combine(tls, "tls.key")),
+                        ServerCertificate = srverCert,
                         ClientCertificateMode = ClientCertificateMode.RequireCertificate,
                         SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13,
                         ClientCertificateValidation = (cert, chain, errors) =>
