@@ -1,11 +1,10 @@
+using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using System.Diagnostics.CodeAnalysis;
-using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using static Apiextensions.Fn.Proto.V1.FunctionRunnerService;
-using static System.Net.WebRequestMethods;
 
 namespace Function.SDK.CSharp;
 
@@ -76,56 +75,38 @@ public static class BuilderExtensions
 
         builder.WebHost.UseUrls(GetAddress());
 
-        builder.WebHost.ConfigureKestrel(options =>
+        var tls = GetTLSCertDir();
+        if (IsInsecure() == false && tls != null)
         {
-            options.AddServerHeader = false;
-
-            options.ConfigureEndpointDefaults(listenOptions =>
+            builder.Services.AddAuthentication(CertificateAuthenticationDefaults.AuthenticationScheme).AddCertificate(opts =>
             {
-                listenOptions.Protocols = HttpProtocols.Http2;
-
-                if (IsInsecure() == false)
-                {
-                    var tls = GetTLSCertDir();
-                    if (tls != null)
-                    {
-                        var ca = X509Certificate2.CreateFromPemFile(Path.Combine(tls, "ca.crt"));
-                        var serverCert = X509Certificate2.CreateFromPemFile(Path.Combine(tls, "tls.crt"), Path.Combine(tls, "tls.key"));
-
-                        var adapter = new HttpsConnectionAdapterOptions
-                        {
-                            CheckCertificateRevocation = false,
-                            ClientCertificateMode = ClientCertificateMode.RequireCertificate,
-                            ServerCertificate = serverCert,
-                            SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13,
-                            ServerCertificateChain = [.. new X509Certificate2[] { ca, serverCert }],
-
-                            ClientCertificateValidation = (cert, chain, errors) =>
-                            {
-                                using var custom = new X509Chain
-                                {
-                                    ChainPolicy =
-                                    {
-                                        TrustMode = X509ChainTrustMode.CustomRootTrust,
-                                        RevocationMode = X509RevocationMode.NoCheck,
-                                        VerificationFlags = X509VerificationFlags.NoFlag,
-                                        DisableCertificateDownloads = true
-                                    }
-                                };
-
-                                custom.ChainPolicy.CustomTrustStore.Add(ca);
-
-                                return custom.Build(cert);
-                            },
-                        };
-
-                        // Disables Client Cert Validation
-                        //adapter.AllowAnyClientCertificate();
-
-                        listenOptions.UseHttps(adapter);
-                    }
-                }
+                opts.ChainTrustValidationMode = X509ChainTrustMode.CustomRootTrust;
+                opts.CustomTrustStore.Add(X509CertificateLoader.LoadCertificateFromFile(Path.Combine(tls, "ca.crt")));
+                opts.AllowedCertificateTypes = CertificateTypes.All;
+                opts.RevocationMode = X509RevocationMode.NoCheck;
             });
+        }
+        else
+        {
+            builder.Services.AddAuthentication();
+        }
+
+        builder.Services.Configure<KestrelServerOptions>(options =>
+        {
+            options.ConfigureEndpointDefaults(lo =>
+            {
+                lo.Protocols = HttpProtocols.Http2;
+            });
+
+            if (IsInsecure() == false && tls != null)
+            {
+                options.ConfigureHttpsDefaults(options =>
+                {
+                    options.SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13;
+                    options.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
+                    options.ServerCertificate = X509Certificate2.CreateFromPemFile(Path.Combine(tls, "tls.crt"), Path.Combine(tls, "tls.key"));
+                });
+            }
         });
 
         builder.Logging.AddFilter("Default", IsDebug() ? LogLevel.Debug : LogLevel.Information);
@@ -133,17 +114,8 @@ public static class BuilderExtensions
         builder.Logging.AddFilter("Microsoft.AspNetCore.Hosting.Diagnostics", LogLevel.Critical);
         builder.Logging.AddFilter("Microsoft.Hosting.Lifetime", LogLevel.Warning);
 
-        //builder.Logging.AddJsonConsole(options =>
-        //{
-        //    options.IncludeScopes = false;
-        //    options.TimestampFormat = "HH:mm:ss ";
-        //    options.JsonWriterOptions = new()
-        //    {
-        //        Indented = true,
-        //    };
-        //});
-
         builder.Services.AddGrpc();
+        builder.Services.AddGrpcReflection();
     }
 
     /// <summary>
@@ -155,6 +127,9 @@ public static class BuilderExtensions
     {
         app.Logger.LogInformation("Starting Application");
 
+        app.UseAuthentication();
+
         app.MapGrpcService<TService>();
+        app.MapGrpcReflectionService();
     }
 }
