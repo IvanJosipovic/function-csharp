@@ -107,7 +107,8 @@ public static class BuilderExtensions
                                     {
                                         TrustMode = X509ChainTrustMode.CustomRootTrust,
                                         RevocationMode = X509RevocationMode.NoCheck,
-                                        VerificationFlags = X509VerificationFlags.NoFlag
+                                        VerificationFlags = X509VerificationFlags.NoFlag,
+                                        DisableCertificateDownloads = true
                                     }
                                 };
 
@@ -131,15 +132,15 @@ public static class BuilderExtensions
         builder.Logging.AddFilter("Microsoft.AspNetCore.Hosting.Diagnostics", LogLevel.Critical);
         builder.Logging.AddFilter("Microsoft.Hosting.Lifetime", LogLevel.Warning);
 
-        builder.Logging.AddJsonConsole(options =>
-        {
-            options.IncludeScopes = false;
-            options.TimestampFormat = "HH:mm:ss ";
-            options.JsonWriterOptions = new()
-            {
-                Indented = true,
-            };
-        });
+        //builder.Logging.AddJsonConsole(options =>
+        //{
+        //    options.IncludeScopes = false;
+        //    options.TimestampFormat = "HH:mm:ss ";
+        //    options.JsonWriterOptions = new()
+        //    {
+        //        Indented = true,
+        //    };
+        //});
 
         builder.Services.AddGrpc();
     }
