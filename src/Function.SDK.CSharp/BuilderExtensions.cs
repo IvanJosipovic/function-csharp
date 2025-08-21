@@ -91,29 +91,35 @@ public static class BuilderExtensions
                         var ca = X509CertificateLoader.LoadCertificateFromFile(Path.Combine(tls, "ca.crt"));
                         var serverCert = X509Certificate2.CreateFromPemFile(Path.Combine(tls, "tls.crt"), Path.Combine(tls, "tls.key"));
 
-                        listenOptions.UseHttps(new HttpsConnectionAdapterOptions
+                        var adapter = new HttpsConnectionAdapterOptions
                         {
                             CheckCertificateRevocation = false,
                             ClientCertificateMode = ClientCertificateMode.RequireCertificate,
                             ServerCertificate = serverCert,
                             SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13,
                             ServerCertificateChain = [.. new X509Certificate2[] { ca, serverCert }],
-                            ClientCertificateValidation = (cert, chain, errors) =>
-                            {
-                                using var custom = new X509Chain
-                                {
-                                    ChainPolicy =
-                                    {
-                                        TrustMode = X509ChainTrustMode.CustomRootTrust,
-                                        RevocationMode = X509RevocationMode.NoCheck,
-                                    }
-                                };
 
-                                custom.ChainPolicy.CustomTrustStore.Add(ca);
+                            //ClientCertificateValidation = (cert, chain, errors) =>
+                            //{
+                            //    using var custom = new X509Chain
+                            //    {
+                            //        ChainPolicy =
+                            //        {
+                            //            TrustMode = X509ChainTrustMode.CustomRootTrust,
+                            //            RevocationMode = X509RevocationMode.NoCheck,
+                            //        }
+                            //    };
 
-                                return custom.Build(cert);
-                            }
-                        });
+                            //    custom.ChainPolicy.CustomTrustStore.Add(ca);
+
+                            //    return custom.Build(cert);
+                            //},
+
+                        };
+
+                        adapter.AllowAnyClientCertificate();
+
+                        listenOptions.UseHttps(adapter);
                     }
                 }
             });
