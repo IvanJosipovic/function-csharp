@@ -24,12 +24,12 @@ spec:
               parameters:
                 properties:
                   acl:
-                    description: Access control list for the storage bucket
+                    description: Access control list for the storage bucket. Private, Blob (anonymous access for blobs), Container (anonymous access for containers and blobs)
                     type: string
                     enum:
                     - private
-                    - public
                     - blob
+                    - container
                   location:
                     description: Geographic location where the storage bucket will be created
                     type: string
