@@ -29,6 +29,19 @@ public static class BuilderExtensions
             return args.Contains("-d") || args.Contains("--debug");
         }
 
+        bool IsInsecure()
+        {
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i] == "--insecure")
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         string GetAddress()
         {
             var address = "0.0.0.0:9443";
@@ -41,7 +54,9 @@ public static class BuilderExtensions
                 }
             }
 
-            return GetTLSCertDir() != null ? "https://" : "http://" + address;
+            var insecure = IsInsecure();
+
+            return (IsInsecure() ? "http://" : GetTLSCertDir() != null ? "https://" : "http://") + address;
         }
 
         string? GetTLSCertDir()
@@ -54,20 +69,7 @@ public static class BuilderExtensions
                 }
             }
 
-            return Environment.GetEnvironmentVariable("TLS_CERTS_DIR");
-        }
-
-        bool IsInsecure()
-        {
-            for (int i = 0; i < args.Length; i++)
-            {
-                if (args[i] == "--insecure")
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return Environment.GetEnvironmentVariable("TLS_SERVER_CERTS_DIR");
         }
 
         builder.WebHost.UseKestrelHttpsConfiguration();
