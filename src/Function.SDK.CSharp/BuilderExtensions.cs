@@ -84,12 +84,13 @@ public static class BuilderExtensions
 
             builder.Services.AddAuthentication(CertificateAuthenticationDefaults.AuthenticationScheme).AddCertificate(opts =>
             {
+                opts.AllowedCertificateTypes = CertificateTypes.All;
                 opts.ChainTrustValidationMode = X509ChainTrustMode.CustomRootTrust;
                 opts.CustomTrustStore.Add(X509CertificateLoader.LoadCertificateFromFile(Path.Combine(tls, "ca.crt")));
-                opts.AllowedCertificateTypes = CertificateTypes.All;
                 opts.RevocationMode = X509RevocationMode.NoCheck;
                 opts.ValidateCertificateUse = false;
                 opts.ValidateValidityPeriod = false;
+                opts.AdditionalChainCertificates.Add(X509CertificateLoader.LoadCertificateFromFile(Path.Combine(tls, "ca.crt")));
             });
         }
         else
@@ -108,9 +109,9 @@ public static class BuilderExtensions
             {
                 options.ConfigureHttpsDefaults(options =>
                 {
-                    options.SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13;
                     options.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
                     options.ServerCertificate = X509Certificate2.CreateFromPemFile(Path.Combine(tls, "tls.crt"), Path.Combine(tls, "tls.key"));
+                    options.SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13;
                 });
             }
         });
