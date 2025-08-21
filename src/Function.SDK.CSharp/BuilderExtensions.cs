@@ -89,7 +89,7 @@ public static class BuilderExtensions
                     var tls = GetTLSCertDir();
                     if (tls != null)
                     {
-                        var ca = X509CertificateLoader.LoadCertificateFromFile(Path.Combine(tls, "ca.crt"));
+                        var ca = X509Certificate2.CreateFromPemFile(Path.Combine(tls, "ca.crt"));
                         var serverCert = X509Certificate2.CreateFromPemFile(Path.Combine(tls, "tls.crt"), Path.Combine(tls, "tls.key"));
 
                         var adapter = new HttpsConnectionAdapterOptions
