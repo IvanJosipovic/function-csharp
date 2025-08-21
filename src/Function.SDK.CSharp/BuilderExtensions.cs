@@ -26,7 +26,8 @@ public static class BuilderExtensions
     {
         bool IsDebug()
         {
-            return args.Contains("-d") || args.Contains("--debug");
+            return true;
+            //return args.Contains("-d") || args.Contains("--debug");
         }
 
         bool IsInsecure()
@@ -72,28 +73,31 @@ public static class BuilderExtensions
             return Environment.GetEnvironmentVariable("TLS_SERVER_CERTS_DIR");
         }
 
+        builder.WebHost.UseUrls(GetAddress());
+
         builder.WebHost.ConfigureKestrel(options =>
         {
-            options.ListenAnyIP(9443, listenOptions =>
+            options.AddServerHeader = false;
+
+            options.ConfigureEndpointDefaults(listenOptions =>
             {
                 listenOptions.Protocols = HttpProtocols.Http2;
+
                 if (IsInsecure() == false)
                 {
                     var tls = GetTLSCertDir();
                     if (tls != null)
                     {
-                        Console.WriteLine("Using TLS with certs from: " + tls);
-
-                        Console.WriteLine("Load CA cert");
-                        var clientCa = X509CertificateLoader.LoadCertificateFromFile(Path.Combine(tls, "ca.crt"));
-                        Console.WriteLine("Load Server cert");
-                        var srverCert = X509Certificate2.CreateFromPemFile(Path.Combine(tls, "tls.crt"), Path.Combine(tls, "tls.key"));
+                        var ca = X509CertificateLoader.LoadCertificateFromFile(Path.Combine(tls, "ca.crt"));
+                        var serverCert = X509Certificate2.CreateFromPemFile(Path.Combine(tls, "tls.crt"), Path.Combine(tls, "tls.key"));
 
                         listenOptions.UseHttps(new HttpsConnectionAdapterOptions
                         {
-                            ServerCertificate = srverCert,
+                            CheckCertificateRevocation = false,
                             ClientCertificateMode = ClientCertificateMode.RequireCertificate,
+                            ServerCertificate = serverCert,
                             SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13,
+                            ServerCertificateChain = [.. new X509Certificate2[] { ca, serverCert }],
                             ClientCertificateValidation = (cert, chain, errors) =>
                             {
                                 using var custom = new X509Chain
@@ -101,10 +105,11 @@ public static class BuilderExtensions
                                     ChainPolicy =
                                     {
                                         TrustMode = X509ChainTrustMode.CustomRootTrust,
-                                        CustomTrustStore = { clientCa },
                                         RevocationMode = X509RevocationMode.NoCheck,
                                     }
                                 };
+
+                                custom.ChainPolicy.CustomTrustStore.Add(ca);
 
                                 return custom.Build(cert);
                             }
