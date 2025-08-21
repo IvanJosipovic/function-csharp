@@ -78,15 +78,16 @@ public static class BuilderExtensions
         var tls = GetTLSCertDir();
         if (IsInsecure() == false && tls != null)
         {
+            builder.WebHost.UseKestrelHttpsConfiguration();
+
             builder.Services.AddAuthentication(CertificateAuthenticationDefaults.AuthenticationScheme).AddCertificate(opts =>
             {
                 opts.ChainTrustValidationMode = X509ChainTrustMode.CustomRootTrust;
                 opts.CustomTrustStore.Add(X509CertificateLoader.LoadCertificateFromFile(Path.Combine(tls, "ca.crt")));
                 opts.AllowedCertificateTypes = CertificateTypes.All;
                 opts.RevocationMode = X509RevocationMode.NoCheck;
+                opts.ValidateCertificateUse = false;
             });
-
-            builder.WebHost.UseKestrelHttpsConfiguration();
         }
         else
         {
