@@ -85,6 +85,8 @@ public static class BuilderExtensions
                 opts.AllowedCertificateTypes = CertificateTypes.All;
                 opts.RevocationMode = X509RevocationMode.NoCheck;
             });
+
+            builder.WebHost.UseKestrelHttpsConfiguration();
         }
         else
         {
