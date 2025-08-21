@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using System.Diagnostics.CodeAnalysis;
+using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using static Apiextensions.Fn.Proto.V1.FunctionRunnerService;
@@ -101,20 +102,28 @@ public static class BuilderExtensions
 
                             ClientCertificateValidation = (cert, chain, errors) =>
                             {
-                                using var custom = new X509Chain
-                                {
-                                    ChainPolicy =
-                                    {
-                                        TrustMode = X509ChainTrustMode.CustomRootTrust,
-                                        RevocationMode = X509RevocationMode.NoCheck,
-                                        VerificationFlags = X509VerificationFlags.NoFlag,
-                                        DisableCertificateDownloads = true
-                                    }
-                                };
+                                //using var custom = new X509Chain
+                                //{
+                                //    ChainPolicy =
+                                //    {
+                                //        TrustMode = X509ChainTrustMode.CustomRootTrust,
+                                //        RevocationMode = X509RevocationMode.NoCheck,
+                                //        VerificationFlags = X509VerificationFlags.NoFlag,
+                                //        DisableCertificateDownloads = true
+                                //    }
+                                //};
 
-                                custom.ChainPolicy.CustomTrustStore.Add(ca);
+                                //custom.ChainPolicy.CustomTrustStore.Add(ca);
 
-                                return custom.Build(cert);
+                                //return custom.Build(cert);
+
+                                chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+                                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                                chain.ChainPolicy.VerificationFlags = X509VerificationFlags.NoFlag;
+                                chain.ChainPolicy.DisableCertificateDownloads = true;
+                                chain.ChainPolicy.CustomTrustStore.Add(ca);
+
+                                return chain.Build(cert) && errors == SslPolicyErrors.None;
                             },
                         };
 
