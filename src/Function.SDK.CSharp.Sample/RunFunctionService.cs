@@ -66,10 +66,7 @@ public class RunFunctionService : FunctionRunnerServiceBase
                     },
                     ResourceGroupNameSelector = new()
                     {
-                        MatchLabels = new Dictionary<string, string>()
-                        {
-                            {"matchControllerRef", "True" }
-                        }
+                        MatchControllerRef = true
                     }
                 }
             }
@@ -89,10 +86,7 @@ public class RunFunctionService : FunctionRunnerServiceBase
                     ContainerAccessType = @params.Acl.AsString(EnumFormat.EnumMemberValue),
                     StorageAccountNameSelector = new()
                     {
-                        MatchLabels = new Dictionary<string, string>()
-                        {
-                            {"matchControllerRef", "True" }
-                        }
+                        MatchControllerRef = true
                     }
                 }
             }

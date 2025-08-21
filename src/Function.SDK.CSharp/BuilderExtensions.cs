@@ -107,6 +107,7 @@ public static class BuilderExtensions
                             //        {
                             //            TrustMode = X509ChainTrustMode.CustomRootTrust,
                             //            RevocationMode = X509RevocationMode.NoCheck,
+                            //            VerificationFlags = X509VerificationFlags.NoFlag
                             //        }
                             //    };
 
@@ -114,7 +115,6 @@ public static class BuilderExtensions
 
                             //    return custom.Build(cert);
                             //},
-
                         };
 
                         adapter.AllowAnyClientCertificate();
