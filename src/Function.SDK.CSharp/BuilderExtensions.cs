@@ -41,9 +41,7 @@ public static class BuilderExtensions
                 }
             }
 
-            var insecure = IsInsecure();
-
-            return insecure ? "http://" : GetTLSCertDir() != null ? "https://" : "http://" + address;
+            return GetTLSCertDir() != null ? "https://" : "http://" + address;
         }
 
         string? GetTLSCertDir()
@@ -86,6 +84,8 @@ public static class BuilderExtensions
 
                 if (IsInsecure() == false && tls != null)
                 {
+                    Console.WriteLine("Using TLS with certs from: " + tls);
+
                     var clientCa = X509Certificate2.CreateFromPem(Path.Combine(tls, "ca.crt"));
 
                     lo.UseHttps(new HttpsConnectionAdapterOptions
