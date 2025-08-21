@@ -28,7 +28,7 @@ RUN dotnet publish "./Function.SDK.CSharp.Sample.csproj" -c $BUILD_CONFIGURATION
 FROM base AS final
 
 WORKDIR /
-ADD package.yaml .
+COPY Function.SDK.CSharp.Sample/package.yaml .
 
 WORKDIR /app
 COPY --from=publish /app/publish .
