@@ -72,48 +72,44 @@ public static class BuilderExtensions
             return Environment.GetEnvironmentVariable("TLS_SERVER_CERTS_DIR");
         }
 
-        builder.WebHost.UseKestrelHttpsConfiguration();
-
-        builder.WebHost.UseUrls(GetAddress());
-
         builder.WebHost.ConfigureKestrel(options =>
         {
-            options.ConfigureEndpointDefaults(lo =>
+            options.ListenAnyIP(9443, listenOptions =>
             {
-                lo.Protocols = HttpProtocols.Http2;
-
-                var tls = GetTLSCertDir();
-
-                if (IsInsecure() == false && tls != null)
+                listenOptions.Protocols = HttpProtocols.Http2;
+                if (IsInsecure() == false)
                 {
-                    Console.WriteLine("Using TLS with certs from: " + tls);
-
-                    Console.WriteLine("Load CA cert");
-                    var clientCa = X509CertificateLoader.LoadCertificateFromFile(Path.Combine(tls, "ca.crt"));
-
-                    Console.WriteLine("Load Server cert");
-                    var srverCert = X509Certificate2.CreateFromPemFile(Path.Combine(tls, "tls.crt"), Path.Combine(tls, "tls.key"));
-
-                    lo.UseHttps(new HttpsConnectionAdapterOptions
+                    var tls = GetTLSCertDir();
+                    if (tls != null)
                     {
-                        ServerCertificate = srverCert,
-                        ClientCertificateMode = ClientCertificateMode.RequireCertificate,
-                        SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13,
-                        ClientCertificateValidation = (cert, chain, errors) =>
+                        Console.WriteLine("Using TLS with certs from: " + tls);
+
+                        Console.WriteLine("Load CA cert");
+                        var clientCa = X509CertificateLoader.LoadCertificateFromFile(Path.Combine(tls, "ca.crt"));
+                        Console.WriteLine("Load Server cert");
+                        var srverCert = X509Certificate2.CreateFromPemFile(Path.Combine(tls, "tls.crt"), Path.Combine(tls, "tls.key"));
+
+                        listenOptions.UseHttps(new HttpsConnectionAdapterOptions
                         {
-                            using var custom = new X509Chain
+                            ServerCertificate = srverCert,
+                            ClientCertificateMode = ClientCertificateMode.RequireCertificate,
+                            SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13,
+                            ClientCertificateValidation = (cert, chain, errors) =>
                             {
-                                ChainPolicy =
+                                using var custom = new X509Chain
                                 {
-                                    TrustMode = X509ChainTrustMode.CustomRootTrust,
-                                }
-                            };
+                                    ChainPolicy =
+                                    {
+                                        TrustMode = X509ChainTrustMode.CustomRootTrust,
+                                        CustomTrustStore = { clientCa },
+                                        RevocationMode = X509RevocationMode.NoCheck,
+                                    }
+                                };
 
-                            custom.ChainPolicy.CustomTrustStore.Add(clientCa);
-
-                            return custom.Build(cert);
-                        }
-                    });
+                                return custom.Build(cert);
+                            }
+                        });
+                    }
                 }
             });
         });
