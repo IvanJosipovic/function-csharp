@@ -27,8 +27,7 @@ public static class BuilderExtensions
     {
         bool IsDebug()
         {
-            return true;
-            //return args.Contains("-d") || args.Contains("--debug");
+            return args.Contains("-d") || args.Contains("--debug");
         }
 
         bool IsInsecure()
