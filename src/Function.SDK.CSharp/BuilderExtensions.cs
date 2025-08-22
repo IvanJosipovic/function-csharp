@@ -114,6 +114,7 @@ public static class BuilderExtensions
                                 foreach (var item in custom.ChainStatus)
                                 {
                                     Console.WriteLine(item.Status);
+                                    Console.WriteLine(item.StatusInformation);
                                 }
                             }
 
