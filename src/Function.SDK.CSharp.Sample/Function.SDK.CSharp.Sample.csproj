@@ -8,6 +8,7 @@
     <UserSecretsId>54bf250f-bdf5-42e4-874f-89a4b92290b4</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <IsPackable>false</IsPackable>
+    <DockerfileRunArguments>-p 9443:9443</DockerfileRunArguments>
   </PropertyGroup>
 
   <ItemGroup>

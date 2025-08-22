@@ -78,42 +78,50 @@ public static class BuilderExtensions
 
         var tls = GetTLSCertDir();
 
-        if (IsInsecure() == false && tls != null)
-        {
-            builder.WebHost.UseKestrelHttpsConfiguration();
-
-            builder.Services.AddAuthentication(CertificateAuthenticationDefaults.AuthenticationScheme).AddCertificate(opts =>
-            {
-                opts.AllowedCertificateTypes = CertificateTypes.All;
-                opts.ChainTrustValidationMode = X509ChainTrustMode.CustomRootTrust;
-                opts.CustomTrustStore.Add(X509CertificateLoader.LoadCertificateFromFile(Path.Combine(tls, "ca.crt")));
-                opts.RevocationMode = X509RevocationMode.NoCheck;
-                opts.ValidateCertificateUse = false;
-                opts.ValidateValidityPeriod = false;
-                opts.AdditionalChainCertificates.Add(X509CertificateLoader.LoadCertificateFromFile(Path.Combine(tls, "ca.crt")));
-            });
-        }
-        else
-        {
-            builder.Services.AddAuthentication();
-        }
-
         builder.Services.Configure<KestrelServerOptions>(options =>
         {
             options.ConfigureEndpointDefaults(lo =>
             {
                 lo.Protocols = HttpProtocols.Http2;
-            });
 
-            if (IsInsecure() == false && tls != null)
-            {
-                options.ConfigureHttpsDefaults(options =>
+                if (IsInsecure() == false && tls != null)
                 {
-                    options.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
-                    options.ServerCertificate = X509Certificate2.CreateFromPemFile(Path.Combine(tls, "tls.crt"), Path.Combine(tls, "tls.key"));
-                    options.SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13;
-                });
-            }
+                    lo.UseHttps(sslOpts =>
+                    {
+                        sslOpts.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
+                        sslOpts.ServerCertificate = X509Certificate2.CreateFromPemFile(Path.Combine(tls, "tls.crt"), Path.Combine(tls, "tls.key"));
+                        sslOpts.SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13;
+
+                        sslOpts.ClientCertificateValidation = (cert, chain, error) =>
+                        {
+                            if (cert is null) return false;
+
+                            using var custom = new X509Chain
+                            {
+                                ChainPolicy =
+                                {
+                                    TrustMode = X509ChainTrustMode.CustomRootTrust,
+                                    RevocationMode = X509RevocationMode.NoCheck
+                                }
+                            };
+
+                            custom.ChainPolicy.CustomTrustStore.Add(X509CertificateLoader.LoadCertificateFromFile(Path.Combine(tls, "ca.crt")));
+
+                            var result = custom.Build(cert);
+
+                            if (!result)
+                            {
+                                foreach (var item in custom.ChainStatus)
+                                {
+                                    Console.WriteLine(item.Status);
+                                }
+                            }
+
+                            return result;
+                        };
+                    });
+                }
+            });
         });
 
         builder.Logging.AddFilter("Default", IsDebug() ? LogLevel.Debug : LogLevel.Information);
@@ -135,8 +143,6 @@ public static class BuilderExtensions
         var versionAttribute = Assembly.GetEntryAssembly()!.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion;
 
         app.Logger.LogInformation("Starting Application v{version}", versionAttribute);
-
-        app.UseAuthentication();
 
         app.MapGrpcService<TService>();
         app.MapGrpcReflectionService();
