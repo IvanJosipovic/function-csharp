@@ -28,7 +28,7 @@ jobs:
       uses: docker/setup-buildx-action@v3
 
     - name: Semantic Release Dry Run
-      uses: cycjimmy/semantic-release-action@v3
+      uses: cycjimmy/semantic-release-action@v4
       id: semantic
       with:
         dry_run: true
