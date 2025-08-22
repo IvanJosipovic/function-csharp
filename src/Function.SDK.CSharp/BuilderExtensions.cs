@@ -92,34 +92,8 @@ public static class BuilderExtensions
                         sslOpts.ServerCertificate = X509Certificate2.CreateFromPemFile(Path.Combine(tls, "tls.crt"), Path.Combine(tls, "tls.key"));
                         sslOpts.SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13;
 
-                        sslOpts.ClientCertificateValidation = (cert, chain, error) =>
-                        {
-                            if (cert is null) return false;
-
-                            using var custom = new X509Chain
-                            {
-                                ChainPolicy =
-                                {
-                                    TrustMode = X509ChainTrustMode.CustomRootTrust,
-                                    RevocationMode = X509RevocationMode.NoCheck
-                                }
-                            };
-
-                            custom.ChainPolicy.CustomTrustStore.Add(X509CertificateLoader.LoadCertificateFromFile(Path.Combine(tls, "ca.crt")));
-
-                            var result = custom.Build(cert);
-
-                            if (!result)
-                            {
-                                foreach (var item in custom.ChainStatus)
-                                {
-                                    Console.WriteLine(item.Status);
-                                    Console.WriteLine(item.StatusInformation);
-                                }
-                            }
-
-                            return result;
-                        };
+                        // Client Certs are not signed by CA...
+                        sslOpts.AllowAnyClientCertificate();
                     });
                 }
             });
