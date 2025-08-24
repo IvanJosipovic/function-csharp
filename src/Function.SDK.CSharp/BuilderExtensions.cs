@@ -91,7 +91,7 @@ public static class BuilderExtensions
                         sslOpts.ServerCertificate = X509Certificate2.CreateFromPemFile(Path.Combine(tls, "tls.crt"), Path.Combine(tls, "tls.key"));
                         sslOpts.SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13;
 
-                        // Client Certs are not signed by CA...
+                        // Client Certs are not signed by the provided CA...
                         sslOpts.AllowAnyClientCertificate();
                     });
                 }

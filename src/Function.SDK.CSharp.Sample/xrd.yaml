@@ -146,9 +146,6 @@ spec:
             type: object
             required:
             - parameters
-          status:
-            description: StorageBucketStatus defines the observed state of StorageBucket.
-            type: object
         required:
         - spec
         type: object

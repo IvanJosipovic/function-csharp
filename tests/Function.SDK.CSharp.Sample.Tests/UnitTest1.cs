@@ -17,7 +17,7 @@ namespace Function.SDK.CSharp.Sample.Tests;
 public class UnitTest1
 {
     [Fact]
-    public void Test1()
+    public void TestMerge()
     {
         var xr = new V1alpha1XStorageBucket()
         {
@@ -90,6 +90,143 @@ public class UnitTest1
         var response2 = request2.GetTestResponse();
 
         response2.Desired.GetResource<V1beta1ResourceGroup>("rg").ShouldBeEquivalentTo(desiredResource2);
+    }
+
+    [Fact]
+    public void TestReadyFalse()
+    {
+        var xr = new V1alpha1XStorageBucket()
+        {
+            Metadata = new()
+            {
+                Name = "test",
+                NamespaceProperty = "default"
+            },
+            Spec = new()
+            {
+                Parameters = new()
+                {
+                    Location = V1alpha1XStorageBucketSpecParametersLocationEnum.Eastus,
+                    Versioning = true,
+                    Acl = V1alpha1XStorageBucketSpecParametersAclEnum.Private,
+                }
+            }
+        };
+
+        var desiredResource = new V1beta1ResourceGroup()
+        {
+            ApiVersion = V1beta1ResourceGroup.KubeGroup + "/" + V1beta1ResourceGroup.KubeApiVersion,
+            Kind = V1beta1ResourceGroup.KubeKind,
+            Spec = new()
+            {
+                ForProvider = new()
+                {
+                    Location = xr.Spec.Parameters.Location.AsString(EnumFormat.EnumMemberValue)
+                }
+            }
+        };
+
+        var observedResource = new V1beta1ResourceGroup()
+        {
+            ApiVersion = V1beta1ResourceGroup.KubeGroup + "/" + V1beta1ResourceGroup.KubeApiVersion,
+            Kind = V1beta1ResourceGroup.KubeKind,
+            Spec = new()
+            {
+                ForProvider = new()
+                {
+                    Location = xr.Spec.Parameters.Location.AsString(EnumFormat.EnumMemberValue)
+                }
+            },
+            Status = new()
+            {
+                Conditions =
+                [
+                    new()
+                    {
+                        Type = "Ready",
+                        Status = "False"
+                    }
+                ]
+            }
+        };
+
+        var request = TestExtensions.GetFunctionRequest();
+        request.SetCompositeResource(xr);
+        request.Desired.AddOrUpdate("rg", desiredResource);
+        request.Observed.AddOrUpdate("rg", observedResource);
+
+        var response1 = request.GetTestResponse();
+
+        var desiredResourceResponse = response1.Desired.Resources["rg"];
+        desiredResourceResponse.Ready.ShouldBe(Ready.False);
+    }
+
+    [Fact]
+    public void TestReadyTrue()
+    {
+        var xr = new V1alpha1XStorageBucket()
+        {
+            Metadata = new()
+            {
+                Name = "test",
+                NamespaceProperty = "default"
+            },
+            Spec = new()
+            {
+                Parameters = new()
+                {
+                    Location = V1alpha1XStorageBucketSpecParametersLocationEnum.Eastus,
+                    Versioning = true,
+                    Acl = V1alpha1XStorageBucketSpecParametersAclEnum.Private,
+                }
+            }
+        };
+
+        var desiredResource = new V1beta1ResourceGroup()
+        {
+            ApiVersion = V1beta1ResourceGroup.KubeGroup + "/" + V1beta1ResourceGroup.KubeApiVersion,
+            Kind = V1beta1ResourceGroup.KubeKind,
+            Spec = new()
+            {
+                ForProvider = new()
+                {
+                    Location = xr.Spec.Parameters.Location.AsString(EnumFormat.EnumMemberValue)
+                }
+            }
+        };
+
+        var observedResource = new V1beta1ResourceGroup()
+        {
+            ApiVersion = V1beta1ResourceGroup.KubeGroup + "/" + V1beta1ResourceGroup.KubeApiVersion,
+            Kind = V1beta1ResourceGroup.KubeKind,
+            Spec = new()
+            {
+                ForProvider = new()
+                {
+                    Location = xr.Spec.Parameters.Location.AsString(EnumFormat.EnumMemberValue)
+                }
+            },
+            Status = new()
+            {
+                Conditions =
+                [
+                    new()
+                    {
+                        Type = "Ready",
+                        Status = "True"
+                    }
+                ]
+            }
+        };
+
+        var request = TestExtensions.GetFunctionRequest();
+        request.SetCompositeResource(xr);
+        request.Desired.AddOrUpdate("rg", desiredResource);
+        request.Observed.AddOrUpdate("rg", observedResource);
+
+        var response1 = request.GetTestResponse();
+        var desiredResourceResponse = response1.Desired.Resources["rg"];
+        desiredResourceResponse.Ready.ShouldBe(Ready.True);
     }
 }
 

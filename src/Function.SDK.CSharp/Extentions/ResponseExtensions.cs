@@ -5,71 +5,36 @@ using System.Text.Json;
 
 namespace Function.SDK.CSharp;
 
-// https://github.com/crossplane/function-sdk-python/blob/main/crossplane/function/response.py
 /// <summary>
-/// Utilities for working with RunFunctionResponses.
+/// Package response contains utilities for working with RunFunctionResponses.
 /// </summary>
-public static class Response
+public static partial class ResponseExtensions
 {
     /// <summary>
-    /// The default TTL for which a RunFunctionResponse may be cached.
+    /// Fatal adds a fatal result to the supplied RunFunctionResponse.
+    /// An event will be created for the Composite Resource.
+    /// A fatal result cannot target the claim.
     /// </summary>
-    public static readonly Duration DefaultTTL = Duration.FromTimeSpan(TimeSpan.FromMinutes(1));
-
-    /// <summary>
-    /// Create a response to the supplied request.
-    /// </summary>
-    /// <param name="request">The request to respond to.</param>
-    /// <returns>A response to the supplied request.</returns>
-    public static RunFunctionResponse To(this RunFunctionRequest request)
-    {
-        return request.To(DefaultTTL);
-    }
-
-    /// <summary>
-    /// Create a response to the supplied request.
-    /// </summary>
-    /// <param name="request">The request to respond to.</param>
-    /// <param name="ttl">How long Crossplane may optionally cache the response.</param>
-    /// <returns>A response to the supplied request.</returns>
-    public static RunFunctionResponse To(this RunFunctionRequest request, Duration ttl)
-    {
-        var resp = new RunFunctionResponse()
-        {
-            Meta = new ResponseMeta()
-            {
-                Tag = request.Meta?.Tag ?? "",
-                Ttl = ttl
-            },
-            Desired = request.Desired,
-            Context = request.Context,
-        };
-
-        return resp;
-    }
-
-    /// <summary>
-    /// Add a normal result to the response.
-    /// </summary>
-    /// <param name="rsp"></param>
+    /// <param name="response"></param>
     /// <param name="message"></param>
-    public static void Normal(this RunFunctionResponse rsp, string message)
+    public static void Fatal(this RunFunctionResponse response, string message)
     {
-        rsp.Results.Add(new Result
+        response.Results.Add(new Result
         {
-            Severity = Severity.Normal,
+            Severity = Severity.Fatal,
             Message = message
         });
     }
 
     /// <summary>
-    /// Add a warning result to the response.
+    /// Warning adds a warning result to the supplied RunFunctionResponse.
+    /// An event will be created for the Composite Resource.
     /// </summary>
-    /// <param name="rsp"></param>
+    /// <param name="response"></param>
     /// <param name="message"></param>
-    public static void Warning(this RunFunctionResponse rsp, string message)
+    public static void Warning(this RunFunctionResponse response, string message)
     {
-        rsp.Results.Add(new Result
+        response.Results.Add(new Result
         {
             Severity = Severity.Warning,
             Message = message
@@ -77,16 +42,33 @@ public static class Response
     }
 
     /// <summary>
-    /// Add a fatal result to the response.
+    /// Normal adds a normal result to the supplied RunFunctionResponse.
+    /// An event will be created for the Composite Resource.
     /// </summary>
-    /// <param name="rsp"></param>
+    /// <param name="response"></param>
     /// <param name="message"></param>
-    public static void Fatal(this RunFunctionResponse rsp, string message)
+    public static void Normal(this RunFunctionResponse response, string message)
     {
-        rsp.Results.Add(new Result
+        response.Results.Add(new Result
         {
-            Severity = Severity.Fatal,
+            Severity = Severity.Normal,
             Message = message
+        });
+    }
+
+    /// <summary>
+    /// NormalF adds a normal result to the supplied RunFunctionResponse.
+    /// An event will be created for the Composite Resource.
+    /// </summary>
+    /// <param name="response"></param>
+    /// <param name="message"></param>
+    /// <param name="args"></param>
+    public static void NormalF(this RunFunctionResponse response, string message, params string[] args)
+    {
+        response.Results.Add(new Result
+        {
+            Severity = Severity.Normal,
+            Message = string.Format(message, args)
         });
     }
 
@@ -96,40 +78,17 @@ public static class Response
     /// to the Operation's status.pipeline field. This function sets that output
     /// on the response.
     /// </summary>
-    /// <param name="rsp">The RunFunctionResponse to update.</param>
+    /// <param name="response">The RunFunctionResponse to update.</param>
     /// <param name="output">The output data as a Dictionary or protobuf Struct.</param>
     /// <exception cref="TypeAccessException">Thrown if the output type is not supported.</exception>
-    public static void SetOutput(this RunFunctionResponse rsp, object output)
+    public static void SetOutput(this RunFunctionResponse response, object output)
     {
-        rsp.Output = output switch
+        response.Output = output switch
         {
             Dictionary<string, object> dict => Struct.Parser.ParseJson(JsonSerializer.Serialize(dict)),
             Struct s => s,
             _ => throw new TypeAccessException($"Unsupported output type: {output?.GetType()}"),
         };
-    }
-
-    /// <summary>
-    /// Adds Desired Resource or merges with an exiting one
-    /// </summary>
-    /// <param name="state"></param>
-    /// <param name="key"></param>
-    /// <param name="obj"></param>
-    public static void AddOrUpdate(this State state, string key, IKubernetesObject obj)
-    {
-        var kubeObj = Struct.Parser.ParseJson(KubernetesJson.Serialize(obj));
-
-        if (state.Resources.TryGetValue(key, out Resource? value))
-        {
-            value.Resource_.MergeFrom(kubeObj);
-        }
-        else
-        {
-            state.Resources[key] = new()
-            {
-                Resource_ = kubeObj
-            };
-        }
     }
 
     /// <summary>

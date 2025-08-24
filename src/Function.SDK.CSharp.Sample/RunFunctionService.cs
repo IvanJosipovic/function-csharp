@@ -5,6 +5,7 @@ using Grpc.Core;
 using Function.SDK.CSharp.SourceGenerator.Models.platform.example.com;
 using Apiextensions.Fn.Proto.V1;
 using EnumsNET;
+using k8s.Models;
 
 namespace Function.SDK.CSharp.Sample;
 
@@ -19,7 +20,15 @@ public class RunFunctionService : FunctionRunnerServiceBase
 
     public override Task<RunFunctionResponse> RunFunction(RunFunctionRequest request, ServerCallContext context)
     {
-        var resp = request.To(Response.DefaultTTL);
+        var resp = request.To(RequestExtensions.DefaultTTL);
+
+        // Get Desired resources and update Status if Ready
+        var ready = request.UpdateReadyDesiredResources(_logger);
+
+        foreach (var item in ready)
+        {
+            resp.Desired.Resources[item.Key] = item.Value;
+        }
 
         _logger.LogInformation("Running Function");
         resp.Normal("Running Function");
