@@ -146,4 +146,48 @@ public static partial class ResponseExtensions
         rsp.Requirements ??= new Requirements();
         rsp.Requirements.Resources[name] = selector;
     }
+
+
+    public static void UpdateDesiredReadyStatus(this RunFunctionResponse response, RunFunctionRequest request, ILogger _logger)
+    {
+        var observed = request.GetObservedComposedResources();
+
+        foreach (var dr in response.Desired.Resources.ToDictionary())
+        {
+            // If this desired resource doesn't exist in the observed resources, it
+            // can't be ready because it doesn't yet exist
+            if (observed.TryGetValue(dr.Key, out Resource? or))
+            {
+                // Check if Ready
+                if (dr.Value.Ready == Ready.True)
+                {
+                    _logger.LogDebug("Ignoring desired resource that already has explicit readiness: {name} {ready}", dr.Key, dr.Value.Ready);
+                    continue;
+                }
+
+                // Now we know this resource exists, and not ready
+                _logger.LogDebug("Found desired resource with unknown readiness: {name}", dr.Key);
+
+                // If this observed resource has a status condition with type: Ready,
+                // status: True, we set its readiness to true.
+                var condition = or.GetCondition("Ready");
+
+                if (condition?.Fields["status"].StringValue == "True")
+                {
+                    _logger.LogInformation("Automatically determined that composed resource is ready: {name}", dr.Key);
+                    dr.Value.Ready = Ready.True;
+                }
+                else
+                {
+                    _logger.LogInformation("Automatically determined that composed resource is not ready: {name}", dr.Key);
+                    dr.Value.Ready = Ready.False;
+                }
+            }
+            else
+            {
+                _logger.LogDebug("Ignoring desired resource that does not appear in observed resources: {name}", dr.Key);
+                continue;
+            }
+        }
+    }
 }

@@ -22,14 +22,6 @@ public class RunFunctionService : FunctionRunnerServiceBase
     {
         var resp = request.To(RequestExtensions.DefaultTTL);
 
-        // Get Desired resources and update Status if Ready
-        var ready = request.UpdateReadyDesiredResources(_logger);
-
-        foreach (var item in ready)
-        {
-            resp.Desired.Resources[item.Key] = item.Value;
-        }
-
         _logger.LogInformation("Running Function");
         resp.Normal("Running Function");
 
@@ -102,6 +94,9 @@ public class RunFunctionService : FunctionRunnerServiceBase
         };
 
         resp.Desired.AddOrUpdate("container", desiredContainer);
+
+        // Get Desired resources and update Status if Ready
+        resp.UpdateDesiredReadyStatus(request, _logger);
 
         return Task.FromResult(resp);
     }

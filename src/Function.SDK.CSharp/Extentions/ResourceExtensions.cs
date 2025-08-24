@@ -9,17 +9,23 @@ public static class ResourceExtensions
     /// Gets the Resource condition by name
     /// </summary>
     /// <param name="resource"></param>
-    /// <param name="condition"></param>
+    /// <param name="conditionType"></param>
     /// <returns></returns>
-    public static Struct? GetCondition(this Resource resource, string condition)
+    public static Struct? GetCondition(this Resource resource, string conditionType)
     {
-        var conditions = resource.Resource_.Fields["status"].StructValue.Fields["conditions"].ListValue.Values;
-
-        foreach (var value in conditions)
+        if (resource.Resource_.Fields.TryGetValue("status", out Value? status))
         {
-            if (value.StructValue.Fields["type"].StringValue == condition)
+            if (status.StructValue.Fields.TryGetValue("conditions", out Value? conditions))
             {
-                return value.StructValue;
+                var conditionValues = conditions.ListValue.Values;
+
+                foreach (var condition in conditionValues)
+                {
+                    if (condition.StructValue.Fields["type"].StringValue == conditionType)
+                    {
+                        return condition.StructValue;
+                    }
+                }
             }
         }
 
