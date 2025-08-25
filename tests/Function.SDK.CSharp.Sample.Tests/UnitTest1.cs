@@ -44,8 +44,6 @@ public class UnitTest1
 
         var desiredResource = new V1beta1ResourceGroup()
         {
-            ApiVersion = V1beta1ResourceGroup.KubeGroup + "/" + V1beta1ResourceGroup.KubeApiVersion,
-            Kind = V1beta1ResourceGroup.KubeKind,
             Spec = new()
             {
                 ForProvider = new()
@@ -61,8 +59,6 @@ public class UnitTest1
 
         var desiredResource2 = new V1beta1ResourceGroup()
         {
-            ApiVersion = V1beta1ResourceGroup.KubeGroup + "/" + V1beta1ResourceGroup.KubeApiVersion,
-            Kind = V1beta1ResourceGroup.KubeKind,
             Spec = new()
             {
                 ForProvider = new()
@@ -115,8 +111,6 @@ public class UnitTest1
 
         var desiredResource = new V1beta1ResourceGroup()
         {
-            ApiVersion = V1beta1ResourceGroup.KubeGroup + "/" + V1beta1ResourceGroup.KubeApiVersion,
-            Kind = V1beta1ResourceGroup.KubeKind,
             Spec = new()
             {
                 ForProvider = new()
@@ -128,8 +122,6 @@ public class UnitTest1
 
         var observedResource = new V1beta1ResourceGroup()
         {
-            ApiVersion = V1beta1ResourceGroup.KubeGroup + "/" + V1beta1ResourceGroup.KubeApiVersion,
-            Kind = V1beta1ResourceGroup.KubeKind,
             Spec = new()
             {
                 ForProvider = new()
@@ -184,8 +176,6 @@ public class UnitTest1
 
         var desiredResource = new V1beta1ResourceGroup()
         {
-            ApiVersion = V1beta1ResourceGroup.KubeGroup + "/" + V1beta1ResourceGroup.KubeApiVersion,
-            Kind = V1beta1ResourceGroup.KubeKind,
             Spec = new()
             {
                 ForProvider = new()
@@ -197,8 +187,6 @@ public class UnitTest1
 
         var observedResource = new V1beta1ResourceGroup()
         {
-            ApiVersion = V1beta1ResourceGroup.KubeGroup + "/" + V1beta1ResourceGroup.KubeApiVersion,
-            Kind = V1beta1ResourceGroup.KubeKind,
             Spec = new()
             {
                 ForProvider = new()

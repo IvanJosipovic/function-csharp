@@ -189,5 +189,10 @@ public static partial class ResponseExtensions
                 continue;
             }
         }
+
+        if (response.Desired.Resources.All(x => x.Value.Ready == Ready.True))
+        {
+            _logger.LogInformation("All Desired Resources are ready");
+        }
     }
 }

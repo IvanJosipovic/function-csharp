@@ -105,6 +105,17 @@ public static class BuilderExtensions
 
         builder.Services.AddGrpc();
         builder.Services.AddGrpcReflection();
+
+        builder.Logging.AddJsonConsole(options =>
+        {
+            options.IncludeScopes = false;
+            options.TimestampFormat = "HH:mm:ssss";
+            options.IncludeScopes = true;
+            options.JsonWriterOptions = new()
+            {
+                Indented = true,
+            };
+        });
     }
 
     /// <summary>
