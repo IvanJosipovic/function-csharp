@@ -376,7 +376,7 @@
                 "properties": {
                   "openAPIV3Schema": {
                     "description": "OpenAPIV3Schema is the OpenAPI v3 schema to use for validation and\npruning.",
-                    "$ref": "apiextensions.schema#/definitions/io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.JSONSchemaProps"
+                    "$ref": "apiextensions.schema.json#/definitions/io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1.JSONSchemaProps"
                   }
                 },
                 "type": "object"

@@ -1,4 +1,8 @@
 # function-sdk-csharp
+[![codecov](https://codecov.io/gh/IvanJosipovic/function-sdk-csharp/graph/badge.svg?token=Xzi1otVyUo)](https://codecov.io/gh/IvanJosipovic/function-sdk-csharp)
+[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Function.SDK.CSharp.svg?style=flat-square)](https://www.nuget.org/packages?q=Function.SDK.CSharp)
+[![Nuget (with prereleases)](https://img.shields.io/nuget/dt/Function.SDK.CSharp.svg?style=flat-square)](https://www.nuget.org/packages?q=Function.SDK.CSharp)
+
 The C# SDK for writing [composition functions](https://docs.crossplane.io/latest/composition/compositions/).
 
 ## Features
@@ -40,8 +44,8 @@ dotnet debug
 
 ## Run Function In Docker
 ```shell
-docker build -t function-sdk-csharp -f src/Function.SDK.CSharp.Sample/Dockerfile src
-docker run -it -p 9443:9443 function-sdk-csharp
+docker build -t function-sdk-csharp-sample -f src/Function.SDK.CSharp.Sample/Dockerfile src
+docker run -it -p 9443:9443 function-sdk-csharp-sample
 ```
 
 ## Run Test

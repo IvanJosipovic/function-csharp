@@ -5,9 +5,6 @@ metadata:
   name: xstoragebuckets.platform.example.com
 spec:
   scope: Namespaced
-  claimNames:
-    kind: StorageBucket
-    plural: storagebuckets
   group: platform.example.com
   names:
     categories:
@@ -27,12 +24,12 @@ spec:
               parameters:
                 properties:
                   acl:
-                    description: Access control list for the storage bucket
+                    description: Access control list for the storage bucket. Private, Blob (anonymous access for blobs), Container (anonymous access for containers and blobs)
                     type: string
                     enum:
                     - private
-                    - public
                     - blob
+                    - container
                   location:
                     description: Geographic location where the storage bucket will be created
                     type: string
@@ -149,9 +146,6 @@ spec:
             type: object
             required:
             - parameters
-          status:
-            description: StorageBucketStatus defines the observed state of StorageBucket.
-            type: object
         required:
         - spec
         type: object

@@ -1,10 +1,12 @@
-using static Apiextensions.Fn.Proto.V1.FunctionRunnerService;
-using KubernetesCRDModelGen.Models.azure.m.upbound.io;
-using KubernetesCRDModelGen.Models.storage.azure.m.upbound.io;
-using Grpc.Core;
-using Function.SDK.CSharp.SourceGenerator.Models.platform.example.com;
 using Apiextensions.Fn.Proto.V1;
 using EnumsNET;
+using Function.SDK.CSharp.SourceGenerator.Models.platform.example.com;
+using Grpc.Core;
+using k8s.Models;
+using KubernetesCRDModelGen.Models.protection.crossplane.io;
+using KubernetesCRDModelGen.Models.azure.m.upbound.io;
+using KubernetesCRDModelGen.Models.storage.azure.m.upbound.io;
+using static Apiextensions.Fn.Proto.V1.FunctionRunnerService;
 
 namespace Function.SDK.CSharp.Sample;
 
@@ -19,87 +21,87 @@ public class RunFunctionService : FunctionRunnerServiceBase
 
     public override Task<RunFunctionResponse> RunFunction(RunFunctionRequest request, ServerCallContext context)
     {
-        var resp = request.To(Response.DefaultTTL);
-
-        _logger.LogInformation("Running Function");
-        resp.Normal("Running Function");
-
         var observedXR = request.GetObservedCompositeResource<V1alpha1XStorageBucket>();
-        var @params = observedXR.Spec.Parameters;
 
-        // Create Resource Group
-        var desiredGroup = new V1beta1ResourceGroup()
+        using (_logger.BeginScope(new Dictionary<string, object>
         {
-            ApiVersion = $"{V1beta1ResourceGroup.KubeGroup}/{V1beta1ResourceGroup.KubeApiVersion}",
-            Kind = V1beta1ResourceGroup.KubeKind,
-            Spec = new V1beta1ResourceGroupSpec
+            ["xr-apiversion"] = observedXR.ApiVersion,
+            ["xr-kind"] = observedXR.Kind,
+            ["xr-name"] = observedXR.Name()
+        }))
+        {
+            var resp = request.To(RequestExtensions.DefaultTTL);
+
+            _logger.LogInformation("Running Function");
+            resp.Normal("Running Function");
+
+            var @params = observedXR.Spec.Parameters;
+
+            // Create Resource Group
+            var desiredGroup = new V1beta1ResourceGroup()
             {
-                ForProvider = new()
+                Spec = new V1beta1ResourceGroupSpec
                 {
-                    Location = @params.Location.AsString(EnumFormat.EnumMemberValue),
+                    ForProvider = new()
+                    {
+                        Location = @params.Location.AsString(EnumFormat.EnumMemberValue),
+                    }
                 }
-            }
-        };
+            };
 
-        resp.Desired.AddOrUpdate("rg", desiredGroup);
+            resp.Desired.AddOrUpdate("rg", desiredGroup);
 
-        // Create Storage Account
-        var desiredAccount = new V1beta1Account()
-        {
-            ApiVersion = $"{V1beta1Account.KubeGroup}/{V1beta1Account.KubeApiVersion}",
-            Kind = V1beta1Account.KubeKind,
-            Metadata = new()
+            // Create Storage Account
+            var desiredAccount = new V1beta1Account()
             {
-                Name = observedXR.Metadata.Name.Replace("-", ""),
-            },
-            Spec = new()
-            {
-                ForProvider = new()
+                Metadata = new()
                 {
-                    AccountTier = "Standard",
-                    AccountReplicationType = "LRS",
-                    Location = @params.Location.AsString(EnumFormat.EnumMemberValue),
-                    InfrastructureEncryptionEnabled = true,
-                    BlobProperties = new()
+                    Name = observedXR.Metadata.Name.Replace("-", ""),
+                },
+                Spec = new()
+                {
+                    ForProvider = new()
                     {
-                        VersioningEnabled = @params.Versioning
-                    },
-                    ResourceGroupNameSelector = new()
-                    {
-                        MatchLabels = new Dictionary<string, string>()
+                        AccountTier = "Standard",
+                        AccountReplicationType = "LRS",
+                        Location = @params.Location.AsString(EnumFormat.EnumMemberValue),
+                        InfrastructureEncryptionEnabled = true,
+                        BlobProperties = new()
                         {
-                            {"matchControllerRef", "True" }
+                            VersioningEnabled = @params.Versioning
+                        },
+                        ResourceGroupNameSelector = new()
+                        {
+                            MatchControllerRef = true
                         }
                     }
                 }
-            }
-        };
+            };
 
-        resp.Desired.AddOrUpdate("account", desiredAccount);
+            resp.Desired.AddOrUpdate("account", desiredAccount);
 
-        // Create Container
-        var desiredContainer = new V1beta1Container()
-        {
-            ApiVersion = $"{V1beta1Container.KubeGroup}/{V1beta1Container.KubeApiVersion}",
-            Kind = V1beta1Container.KubeKind,
-            Spec = new()
+            // Create Container
+            var desiredContainer = new V1beta1Container()
             {
-                ForProvider = new()
+                Spec = new()
                 {
-                    ContainerAccessType = @params.Acl.AsString(EnumFormat.EnumMemberValue),
-                    StorageAccountNameSelector = new()
+                    ForProvider = new()
                     {
-                        MatchLabels = new Dictionary<string, string>()
+                        ContainerAccessType = @params.Acl.AsString(EnumFormat.EnumMemberValue),
+                        StorageAccountNameSelector = new()
                         {
-                            {"matchControllerRef", "True" }
+                            MatchControllerRef = true
                         }
                     }
                 }
-            }
-        };
+            };
 
-        resp.Desired.AddOrUpdate("container", desiredContainer);
+            resp.Desired.AddOrUpdate("container", desiredContainer);
 
-        return Task.FromResult(resp);
+            // Get Desired resources and update Status if Ready
+            resp.UpdateDesiredReadyStatus(request, _logger);
+
+            return Task.FromResult(resp);
+        }
     }
 }

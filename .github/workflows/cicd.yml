@@ -7,14 +7,13 @@ on:
       - 'main'
       - 'alpha'
       - 'beta'
-      - 'dev'
   pull_request:
     types: [opened, reopened, synchronize]
   merge_group:
 
 jobs:
-  create-release:
-    name: Create Release
+  build-test:
+    name: Build & Test & Release
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -25,8 +24,83 @@ jobs:
       with:
         global-json-file: global.json
 
-    - name: Dotnet Build
-      run: dotnet build -c Release
+    - name: Setup Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Semantic Release Dry Run
+      uses: cycjimmy/semantic-release-action@v4
+      id: semantic
+      with:
+        dry_run: true
+        extra_plugins: |
+          conventional-changelog-conventionalcommits
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: .NET Build
+      run: dotnet build -c Release -p:Version=${{ (steps.semantic.outputs.new_release_published && steps.semantic.outputs.new_release_version) || '0.0.1' }}
 
     - name: .NET Test
-      run: dotnet test -c Release --collect:"XPlat Code Coverage"
+      run: dotnet test -c Release --collect:"XPlat Code Coverage" --logger "trx;LogFileName=test-results.trx"
+
+    - name: Coverage
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: coverage.cobertura.xml
+        fail_ci_if_error: true
+
+    - name: Test Report
+      uses: dorny/test-reporter@v2
+      if: success() || failure()
+      with:
+        name: Tests
+        path: '**/TestResults/test-results.trx'
+        reporter: dotnet-trx
+
+    - name: .NET Pack
+      run: dotnet pack -c Release -p:Version=${{ (steps.semantic.outputs.new_release_published && steps.semantic.outputs.new_release_version) || '0.0.1' }}
+
+    - name: Upload NuGet Packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: NuGet Package
+        path: src/**/*.nupkg
+
+    - name: Docker Buildx
+      run: docker buildx build --platform linux/amd64,linux/arm64 -t test.loc/function-sdk-csharp-sample --build-arg VERSION=${{ (steps.semantic.outputs.new_release_published && steps.semantic.outputs.new_release_version) || '0.0.1' }} -f src/Function.SDK.CSharp.Sample/Dockerfile src
+
+    - name: Load Docker Image
+      run: docker buildx build --load --platform $(docker info --format '{{.Architecture}}') -t test.loc/function-sdk-csharp-sample -f src/Function.SDK.CSharp.Sample/Dockerfile src
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'test.loc/function-sdk-csharp-sample'
+        format: 'table'
+        exit-code: '1'
+        ignore-unfixed: true
+        vuln-type: 'os,library'
+        severity: 'CRITICAL,HIGH'
+      env:
+        TRIVY_DISABLE_VEX_NOTICE: true
+
+    - name: Semantic Release
+      if: steps.semantic.outputs.new_release_published == 'true'
+      uses: cycjimmy/semantic-release-action@v4
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        extra_plugins: |
+          conventional-changelog-conventionalcommits
+
+    - name: .NET NuGet Push
+      if: steps.semantic.outputs.new_release_published == 'true'
+      run: dotnet nuget push src/**/*.nupkg -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }}
+
+    - name: Docker Push
+      if: steps.semantic.outputs.new_release_published == 'true'
+      run: |
+        echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${GITHUB_ACTOR} --password-stdin
+
+        docker buildx build --push --platform linux/amd64,linux/arm64 -t ghcr.io/${GITHUB_REPOSITORY,,}/function-sdk-csharp-sample:${{ github.ref_name == 'main' && 'latest' || github.ref_name == 'alpha' && 'alpha' || github.ref_name == 'beta' && 'beta' }} -t ghcr.io/${GITHUB_REPOSITORY,,}/function-sdk-csharp-sample:${{ steps.semantic.outputs.new_release_version }} --build-arg VERSION=${{ steps.semantic.outputs.new_release_version }} -f src/Function.SDK.CSharp.Sample/Dockerfile src

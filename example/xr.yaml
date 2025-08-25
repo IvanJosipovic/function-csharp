@@ -6,4 +6,4 @@ spec:
   parameters:
     location: eastus
     versioning: true
-    acl: public
+    acl: blob

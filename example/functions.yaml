@@ -1,11 +1,11 @@
 apiVersion: pkg.crossplane.io/v1beta1
 kind: Function
 metadata:
-  name: function-template-csharp
+  name: function-sdk-csharp-sample
   annotations:
     # 'Docker' connects to Docker Engine. It uses Docker to pull and run a function runtime.
     # 'Development' connects to a function runtime you have run manually.
     render.crossplane.io/runtime: Development
 spec:
   # This is ignored when using the Development runtime.
-  package: function-template-csharp
+  package: ghcr.io/ivanjosipovic/function-sdk-csharp/function-sdk-csharp-sample:latest

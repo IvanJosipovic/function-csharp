@@ -1,10 +1,11 @@
+using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using static Apiextensions.Fn.Proto.V1.FunctionRunnerService;
-using static System.Net.WebRequestMethods;
 
 namespace Function.SDK.CSharp;
 
@@ -29,6 +30,19 @@ public static class BuilderExtensions
             return args.Contains("-d") || args.Contains("--debug");
         }
 
+        bool IsInsecure()
+        {
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i] == "--insecure")
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         string GetAddress()
         {
             var address = "0.0.0.0:9443";
@@ -43,7 +57,7 @@ public static class BuilderExtensions
 
             var insecure = IsInsecure();
 
-            return insecure ? "http://" : GetTLSCertDir() != null ? "https://" : "http://" + address;
+            return (IsInsecure() ? "http://" : GetTLSCertDir() != null ? "https://" : "http://") + address;
         }
 
         string? GetTLSCertDir()
@@ -56,57 +70,29 @@ public static class BuilderExtensions
                 }
             }
 
-            return Environment.GetEnvironmentVariable("TLS_CERTS_DIR");
+            return Environment.GetEnvironmentVariable("TLS_SERVER_CERTS_DIR");
         }
-
-        bool IsInsecure()
-        {
-            for (int i = 0; i < args.Length; i++)
-            {
-                if (args[i] == "--insecure")
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        builder.WebHost.UseKestrelHttpsConfiguration();
 
         builder.WebHost.UseUrls(GetAddress());
 
-        builder.WebHost.ConfigureKestrel(options =>
+        var tls = GetTLSCertDir();
+
+        builder.Services.Configure<KestrelServerOptions>(options =>
         {
             options.ConfigureEndpointDefaults(lo =>
             {
                 lo.Protocols = HttpProtocols.Http2;
 
-                var tls = GetTLSCertDir();
-
                 if (IsInsecure() == false && tls != null)
                 {
-                    var clientCa = X509Certificate2.CreateFromPem(Path.Combine(tls, "ca.crt"));
-
-                    lo.UseHttps(new HttpsConnectionAdapterOptions
+                    lo.UseHttps(sslOpts =>
                     {
-                        ServerCertificate = X509Certificate2.CreateFromPemFile(Path.Combine(tls, "tls.crt"), Path.Combine(tls, "tls.key")),
-                        ClientCertificateMode = ClientCertificateMode.RequireCertificate,
-                        SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13,
-                        ClientCertificateValidation = (cert, chain, errors) =>
-                        {
-                            using var custom = new X509Chain
-                            {
-                                ChainPolicy =
-                                {
-                                    TrustMode = X509ChainTrustMode.CustomRootTrust,
-                                }
-                            };
+                        sslOpts.ClientCertificateMode = ClientCertificateMode.RequireCertificate;
+                        sslOpts.ServerCertificate = X509Certificate2.CreateFromPemFile(Path.Combine(tls, "tls.crt"), Path.Combine(tls, "tls.key"));
+                        sslOpts.SslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13;
 
-                            custom.ChainPolicy.CustomTrustStore.Add(clientCa);
-
-                            return custom.Build(cert);
-                        }
+                        // Client Certs are not signed by the provided CA...
+                        sslOpts.AllowAnyClientCertificate();
                     });
                 }
             });
@@ -117,17 +103,19 @@ public static class BuilderExtensions
         builder.Logging.AddFilter("Microsoft.AspNetCore.Hosting.Diagnostics", LogLevel.Critical);
         builder.Logging.AddFilter("Microsoft.Hosting.Lifetime", LogLevel.Warning);
 
+        builder.Services.AddGrpc();
+        builder.Services.AddGrpcReflection();
+
         builder.Logging.AddJsonConsole(options =>
         {
             options.IncludeScopes = false;
-            options.TimestampFormat = "HH:mm:ss ";
+            options.TimestampFormat = "HH:mm:ssss";
+            options.IncludeScopes = true;
             options.JsonWriterOptions = new()
             {
                 Indented = true,
             };
         });
-
-        builder.Services.AddGrpc();
     }
 
     /// <summary>
@@ -137,8 +125,11 @@ public static class BuilderExtensions
     /// <param name="app"></param>
     public static void MapFunctionService<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] TService>(this WebApplication app) where TService : FunctionRunnerServiceBase
     {
-        app.Logger.LogInformation("Starting Application");
+        var versionAttribute = Assembly.GetEntryAssembly()!.GetCustomAttribute<AssemblyInformationalVersionAttribute>()!.InformationalVersion;
+
+        app.Logger.LogInformation("Starting Application v{version}", versionAttribute);
 
         app.MapGrpcService<TService>();
+        app.MapGrpcReflectionService();
     }
 }
